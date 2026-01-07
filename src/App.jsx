@@ -497,6 +497,23 @@ export default function Spendsie() {
     background: 'from-slate-900 via-slate-800 to-amber-900/50',
   });
 
+  // Spacing settings (in pixels)
+  const [spacingSettings, setSpacingSettings] = useState({
+    pagePadding: 24,        // px-6 = 24px
+    pageVerticalPadding: 40, // py-10 = 40px
+    headerMarginBottom: 40,  // mb-10 = 40px
+    statsGap: 24,           // gap-6 = 24px
+    statsMarginBottom: 40,  // mb-10 = 40px
+    statsCardPadding: 32,   // p-8 = 32px
+    chartTableGap: 32,      // gap-8 = 32px
+    cardPadding: 32,        // p-8 = 32px
+    tableRowPadding: 16,    // p-4 = 16px
+  });
+
+  const updateSpacing = (key, value) => {
+    setSpacingSettings(prev => ({ ...prev, [key]: parseInt(value) || 0 }));
+  };
+
   const processTransactions = useCallback((rawTransactions) => {
     return rawTransactions.map((t, idx) => ({
       id: idx + 1,
@@ -946,9 +963,9 @@ export default function Spendsie() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 md:py-10">
+      <div className="relative z-10 max-w-7xl mx-auto" style={{ padding: `${spacingSettings.pageVerticalPadding}px ${spacingSettings.pagePadding}px` }}>
         {/* Header */}
-        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ marginBottom: `${spacingSettings.headerMarginBottom}px` }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center glow-amber">
               <Receipt className="w-5 h-5 md:w-6 md:h-6 text-slate-900" />
@@ -1150,34 +1167,34 @@ export default function Spendsie() {
         ) : (
           <div>
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+            <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: `${spacingSettings.statsGap}px`, marginBottom: `${spacingSettings.statsMarginBottom}px` }}>
+              <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
                 <p className="text-slate-400 text-sm mb-3">Total Spending</p>
                 <p className="text-2xl md:text-3xl font-bold mono text-red-400">
                   RM{stats.totalSpending.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+              <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
                 <p className="text-slate-400 text-sm mb-3">Total Income</p>
                 <p className="text-2xl md:text-3xl font-bold mono text-emerald-400">
                   RM{stats.totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+              <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
                 <p className="text-slate-400 text-sm mb-3">Net Flow</p>
                 <p className={`text-2xl md:text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   RM{(stats.totalIncome - stats.totalSpending).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+              <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
                 <p className="text-slate-400 text-sm mb-3">Transactions</p>
                 <p className="text-2xl md:text-3xl font-bold mono">{transactions.length}</p>
               </div>
             </div>
 
             {/* Chart + Table */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="glass rounded-2xl p-5 md:p-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3" style={{ gap: `${spacingSettings.chartTableGap}px` }}>
+              <div className="glass rounded-2xl" style={{ padding: `${spacingSettings.cardPadding}px` }}>
                 <h3 className="font-semibold text-lg mb-6">Spending Breakdown</h3>
                 {stats.pieData.length > 0 ? (
                   <>
@@ -1231,7 +1248,7 @@ export default function Spendsie() {
                 )}
               </div>
 
-              <div className="lg:col-span-2 glass rounded-2xl p-5 md:p-8">
+              <div className="lg:col-span-2 glass rounded-2xl" style={{ padding: `${spacingSettings.cardPadding}px` }}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                   <h3 className="font-semibold text-lg">Transactions</h3>
                   
@@ -1280,16 +1297,16 @@ export default function Spendsie() {
                     <table className="w-full text-sm">
                       <thead className="bg-slate-800/50 sticky top-0">
                         <tr>
-                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('isoDate')}>
+                          <th className="text-left font-medium text-slate-400 sortable" style={{ padding: `${spacingSettings.tableRowPadding}px` }} onClick={() => handleSort('isoDate')}>
                             <div className="flex items-center gap-1">Date <SortIcon columnKey="date" /></div>
                           </th>
-                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('description')}>
+                          <th className="text-left font-medium text-slate-400 sortable" style={{ padding: `${spacingSettings.tableRowPadding}px` }} onClick={() => handleSort('description')}>
                             <div className="flex items-center gap-1">Description <SortIcon columnKey="description" /></div>
                           </th>
-                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('category')}>
+                          <th className="text-left font-medium text-slate-400 sortable" style={{ padding: `${spacingSettings.tableRowPadding}px` }} onClick={() => handleSort('category')}>
                             <div className="flex items-center gap-1">Category <SortIcon columnKey="category" /></div>
                           </th>
-                          <th className="text-right p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('amount')}>
+                          <th className="text-right font-medium text-slate-400 sortable" style={{ padding: `${spacingSettings.tableRowPadding}px` }} onClick={() => handleSort('amount')}>
                             <div className="flex items-center gap-1 justify-end">Amount <SortIcon columnKey="amount" /></div>
                           </th>
                         </tr>
@@ -1297,9 +1314,9 @@ export default function Spendsie() {
                       <tbody>
                         {filteredAndSortedTransactions.map((t) => (
                           <tr key={t.id} className="table-row border-t border-white/5">
-                            <td className="p-4 mono text-slate-400 text-xs whitespace-nowrap">{t.date}</td>
-                            <td className="p-4 max-w-[280px] truncate" title={t.description}>{t.description}</td>
-                            <td className="p-4">
+                            <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
+                            <td className="max-w-[280px] truncate" style={{ padding: `${spacingSettings.tableRowPadding}px` }} title={t.description}>{t.description}</td>
+                            <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
                               {(t.category === 'Money Transfer' || t.category === 'Income') ? (
                                 <span 
                                   className="px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
@@ -1324,7 +1341,7 @@ export default function Spendsie() {
                                 </span>
                               )}
                             </td>
-                            <td className={`p-4 text-right mono font-medium ${t.isCredit ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <td className={`text-right mono font-medium ${t.isCredit ? 'text-emerald-400' : 'text-red-400'}`} style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
                               {t.isCredit ? '+' : '-'}RM{t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}
                             </td>
                           </tr>
@@ -1468,6 +1485,112 @@ export default function Spendsie() {
                 </div>
               </div>
 
+              {/* Spacing Settings Section */}
+              <div className="mb-8">
+                <h4 className="font-medium text-amber-400 mb-4">📐 Spacing Settings (pixels)</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Page Padding (horizontal)</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.pagePadding}
+                      onChange={(e) => updateSpacing('pagePadding', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Page Padding (vertical)</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.pageVerticalPadding}
+                      onChange={(e) => updateSpacing('pageVerticalPadding', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Header Bottom Margin</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.headerMarginBottom}
+                      onChange={(e) => updateSpacing('headerMarginBottom', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Stats Cards Gap</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.statsGap}
+                      onChange={(e) => updateSpacing('statsGap', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Stats Section Bottom Margin</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.statsMarginBottom}
+                      onChange={(e) => updateSpacing('statsMarginBottom', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Stats Card Padding</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.statsCardPadding}
+                      onChange={(e) => updateSpacing('statsCardPadding', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Chart & Table Gap</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.chartTableGap}
+                      onChange={(e) => updateSpacing('chartTableGap', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Card Padding</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.cardPadding}
+                      onChange={(e) => updateSpacing('cardPadding', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 block mb-2">Table Row Padding</label>
+                    <input
+                      type="number"
+                      value={spacingSettings.tableRowPadding}
+                      onChange={(e) => updateSpacing('tableRowPadding', e.target.value)}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Category Settings Section */}
               <div>
                 <h4 className="font-medium text-amber-400 mb-4">📊 Category Settings</h4>
@@ -1511,6 +1634,17 @@ export default function Spendsie() {
                       accent: '#F59E0B',
                       accentLight: '#FCD34D',
                       background: 'from-slate-900 via-slate-800 to-amber-900/50',
+                    });
+                    setSpacingSettings({
+                      pagePadding: 24,
+                      pageVerticalPadding: 40,
+                      headerMarginBottom: 40,
+                      statsGap: 24,
+                      statsMarginBottom: 40,
+                      statsCardPadding: 32,
+                      chartTableGap: 32,
+                      cardPadding: 32,
+                      tableRowPadding: 16,
                     });
                   }}
                   className="px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:text-white transition-colors"
