@@ -35,8 +35,13 @@ const CATEGORY_KEYWORDS = {
     keywords: ['grab', 'grabcar', 'grabpay', 'gojek', 'maxim', 'indriver', 'airasia ride', 'mula'],
     priority: 1,
   },
-  'Petrol': {
-    keywords: ['petrol', 'shell', 'petronas', 'caltex', 'petron', 'bhp', 'fuel', 'setel', 'petrol station', 'gas station'],
+  'EV & Petrol': {
+    keywords: [
+      // EV Charging - known providers
+      'sonicboom',
+      // Petrol
+      'petrol', 'shell', 'petronas', 'caltex', 'petron', 'bhp', 'fuel', 'setel', 'petrol station', 'gas station',
+    ],
     priority: 1,
   },
   'Parking & Toll': {
@@ -150,11 +155,13 @@ const CATEGORY_KEYWORDS = {
       'course', 'udemy', 'coursera', 'skillshare', 'linkedin learning', 'masterclass',
       // Keywords
       'tuition', 'school', 'university', 'college', 'education', 'training', 'akademi', 'sekolah',
-      // Local Universities
-      'uitm', 'um', 'usm', 'ukm', 'utm', 'upm', 'uia', 'unimas', 'ums', 'umt',
+      // Local Universities - use full names to avoid false matches
+      'universiti malaya', 'universiti sains', 'universiti kebangsaan', 'universiti teknologi',
+      'universiti putra', 'universiti islam', 'unimas', 'uitm',
       // Private Universities
-      'taylor', 'sunway university', 'sunway college', 'help', 'inti', 'monash', 'nottingham',
-      'ucsi', 'mmu', 'apu', 'limkokwing', 'segi', 'kdu', 'taylors',
+      'taylors university', 'sunway university', 'sunway college', 'help university', 
+      'inti college', 'monash university', 'nottingham university',
+      'ucsi', 'multimedia university', 'asia pacific university', 'limkokwing', 'segi college', 'kdu',
       // Tuition Centers
       'kumon', 'mental arithmetic', 'abacus',
     ],
@@ -194,8 +201,8 @@ const CATEGORY_KEYWORDS = {
   },
   'Travel': {
     keywords: [
-      // Airlines
-      'airasia', 'air asia', 'malaysia airlines', 'mas', 'firefly', 'batik air', 'malindo',
+      // Airlines - avoid short codes that match other words
+      'airasia', 'air asia', 'malaysia airlines', 'firefly', 'batik air', 'malindo',
       'singapore airlines', 'cathay', 'emirates', 'qatar', 'airline', 'flight',
       // Hotels
       'agoda', 'booking.com', 'trivago', 'expedia', 'hotels.com', 'airbnb', 'oyo',
@@ -241,8 +248,8 @@ const CATEGORY_KEYWORDS = {
   },
   'Money Transfer': {
     keywords: [
-      'fund transfer', 'ibk fund trf', 'ibk fund tfr', 'duitnow', 'mae qr', 'fpx payment',
-      'transfer from', 'transfer to', 'transfer fr', 'instant transfer', 'ibg',
+      'fund transfer', 'ibk fund', 'duitnow', 'mae qr', 'fpx payment',
+      'transfer from', 'transfer to', 'instant transfer', 'ibg',
       'wise', 'remittance', 'western union', 'moneygram', 'worldremit',
     ],
     priority: 1,
@@ -303,7 +310,7 @@ const CATEGORY_KEYWORDS = {
 const CATEGORY_COLORS = {
   'Food & Dining': '#FF6B6B',
   'Grab/E-hailing': '#4ECDC4',
-  'Petrol': '#F39C12',
+  'EV & Petrol': '#F39C12',
   'Parking & Toll': '#9B59B6',
   'Public Transport': '#3498DB',
   'Online Shopping': '#FFE66D',
@@ -328,7 +335,7 @@ const CATEGORY_COLORS = {
   'Loan & Credit': '#D32F2F',
   'Pets': '#8D6E63',
   'Religious': '#7E57C2',
-  'Other': '#BDC3C7',
+  'Payment': '#BDC3C7',
 };
 
 function classifyTransaction(description) {
@@ -337,15 +344,34 @@ function classifyTransaction(description) {
   
   for (const [category, config] of Object.entries(CATEGORY_KEYWORDS)) {
     for (const keyword of config.keywords) {
-      if (lowerDesc.includes(keyword.toLowerCase())) {
-        matches.push({ category, priority: config.priority, keyword });
+      const lowerKeyword = keyword.toLowerCase();
+      
+      // For short keywords (4 chars or less), use word boundary matching
+      // to prevent partial matches like "mas" in "ELMASI" or "um" in "LUMPUR"
+      let isMatch = false;
+      if (lowerKeyword.length <= 4) {
+        // Create regex with word boundaries
+        const regex = new RegExp(`\\b${lowerKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        isMatch = regex.test(lowerDesc);
+      } else {
+        isMatch = lowerDesc.includes(lowerKeyword);
+      }
+      
+      if (isMatch) {
+        matches.push({ category, priority: config.priority, keyword: lowerKeyword });
         break;
       }
     }
   }
   
-  if (matches.length === 0) return 'Other';
-  matches.sort((a, b) => a.priority - b.priority);
+  if (matches.length === 0) return 'Payment';
+  
+  // Sort by priority (lower = higher priority), then by keyword length (longer = more specific)
+  matches.sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+    return b.keyword.length - a.keyword.length; // Prefer longer/more specific matches
+  });
+  
   return matches[0].category;
 }
 
@@ -1438,7 +1464,7 @@ export default function Spendsie() {
                           dataKey="value"
                         >
                           {stats.pieData.map((entry, index) => (
-                            <Cell key={index} fill={colorSettings[entry.name] || colorSettings['Other']} />
+                            <Cell key={index} fill={colorSettings[entry.name] || colorSettings['Payment']} />
                           ))}
                         </Pie>
                         <Tooltip 
@@ -1462,7 +1488,7 @@ export default function Spendsie() {
                           onClick={() => setCategoryFilter(categoryFilter === item.name ? 'all' : item.name)}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0, background: colorSettings[item.name] || colorSettings['Other'] }} />
+                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0, background: colorSettings[item.name] || colorSettings['Payment'] }} />
                             <span className={`text-slate-300 ${categoryFilter === item.name ? 'text-amber-400 font-medium' : ''}`} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                           </div>
                           <span className="mono text-slate-400" style={{ flexShrink: 0, marginLeft: '8px' }}>RM{item.value.toLocaleString()}</span>
@@ -1556,8 +1582,8 @@ export default function Spendsie() {
                                     display: 'inline-block',
                                     padding: '6px 10px',
                                     whiteSpace: 'nowrap',
-                                    background: `${colorSettings[t.category] || colorSettings['Other']}20`,
-                                    color: colorSettings[t.category] || colorSettings['Other']
+                                    background: `${colorSettings[t.category] || colorSettings['Payment']}20`,
+                                    color: colorSettings[t.category] || colorSettings['Payment']
                                   }}
                                   onClick={() => toggleTransferIncome(t.id)}
                                   title="Click to toggle between Money Transfer ↔ Income"
@@ -1571,8 +1597,8 @@ export default function Spendsie() {
                                     display: 'inline-block',
                                     padding: '6px 10px',
                                     whiteSpace: 'nowrap',
-                                    background: `${colorSettings[t.category] || colorSettings['Other']}20`,
-                                    color: colorSettings[t.category] || colorSettings['Other']
+                                    background: `${colorSettings[t.category] || colorSettings['Payment']}20`,
+                                    color: colorSettings[t.category] || colorSettings['Payment']
                                   }}
                                 >
                                   {t.category}
