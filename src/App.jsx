@@ -946,9 +946,9 @@ export default function Spendsie() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 md:py-10">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center glow-amber">
               <Receipt className="w-5 h-5 md:w-6 md:h-6 text-slate-900" />
@@ -1150,35 +1150,35 @@ export default function Spendsie() {
         ) : (
           <div>
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
-                <p className="text-slate-400 text-sm mb-2">Total Spending</p>
-                <p className="text-xl md:text-3xl font-bold mono text-red-400">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+                <p className="text-slate-400 text-sm mb-3">Total Spending</p>
+                <p className="text-2xl md:text-3xl font-bold mono text-red-400">
                   RM{stats.totalSpending.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
-                <p className="text-slate-400 text-sm mb-2">Total Income</p>
-                <p className="text-xl md:text-3xl font-bold mono text-emerald-400">
+              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+                <p className="text-slate-400 text-sm mb-3">Total Income</p>
+                <p className="text-2xl md:text-3xl font-bold mono text-emerald-400">
                   RM{stats.totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
-                <p className="text-slate-400 text-sm mb-2">Net Flow</p>
-                <p className={`text-xl md:text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+                <p className="text-slate-400 text-sm mb-3">Net Flow</p>
+                <p className={`text-2xl md:text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   RM{(stats.totalIncome - stats.totalSpending).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
-                <p className="text-slate-400 text-sm mb-2">Transactions</p>
-                <p className="text-xl md:text-3xl font-bold mono">{transactions.length}</p>
+              <div className="glass rounded-2xl p-5 md:p-8 hover-lift">
+                <p className="text-slate-400 text-sm mb-3">Transactions</p>
+                <p className="text-2xl md:text-3xl font-bold mono">{transactions.length}</p>
               </div>
             </div>
 
             {/* Chart + Table */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="glass rounded-2xl p-6">
-                <h3 className="font-semibold mb-4">Spending Breakdown</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="glass rounded-2xl p-5 md:p-8">
+                <h3 className="font-semibold text-lg mb-6">Spending Breakdown</h3>
                 {stats.pieData.length > 0 ? (
                   <>
                     <ResponsiveContainer width="100%" height={280}>
@@ -1208,14 +1208,14 @@ export default function Spendsie() {
                       </PieChart>
                     </ResponsiveContainer>
                     
-                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto scrollbar-thin">
+                    <div className="space-y-2.5 mt-4 max-h-48 overflow-y-auto scrollbar-thin">
                       {stats.pieData.map((item, i) => (
                         <div 
                           key={i} 
-                          className="flex items-center justify-between text-sm cursor-pointer hover:bg-white/5 rounded-lg px-2 py-1 transition-colors"
+                          className="flex items-center justify-between text-sm cursor-pointer hover:bg-white/5 rounded-lg px-3 py-2 transition-colors"
                           onClick={() => setCategoryFilter(categoryFilter === item.name ? 'all' : item.name)}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <div className="w-3 h-3 rounded-full" style={{ background: colorSettings[item.name] || colorSettings['Other'] }} />
                             <span className={`text-slate-300 ${categoryFilter === item.name ? 'text-amber-400 font-medium' : ''}`}>{item.name}</span>
                           </div>
@@ -1231,9 +1231,9 @@ export default function Spendsie() {
                 )}
               </div>
 
-              <div className="lg:col-span-2 glass rounded-2xl p-4 md:p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
-                  <h3 className="font-semibold">Transactions</h3>
+              <div className="lg:col-span-2 glass rounded-2xl p-5 md:p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                  <h3 className="font-semibold text-lg">Transactions</h3>
                   
                   <div className="flex flex-wrap items-center gap-3 flex-1 md:justify-end">
                     <div className="relative">
@@ -1243,7 +1243,7 @@ export default function Spendsie() {
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-slate-800/50 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-amber-500/50 w-full md:w-48"
+                        className="bg-slate-800/50 border border-white/10 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 w-full md:w-48"
                       />
                     </div>
                     
@@ -1251,7 +1251,7 @@ export default function Spendsie() {
                       <select
                         value={monthFilter}
                         onChange={(e) => setMonthFilter(e.target.value)}
-                        className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500/50"
+                        className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500/50"
                       >
                         <option value="all">All Months</option>
                         {statementMonths.map(month => (
@@ -1263,7 +1263,7 @@ export default function Spendsie() {
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500/50"
+                      className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500/50"
                     >
                       <option value="all">All Categories</option>
                       {stats.categories.map(cat => (
@@ -1280,16 +1280,16 @@ export default function Spendsie() {
                     <table className="w-full text-sm">
                       <thead className="bg-slate-800/50 sticky top-0">
                         <tr>
-                          <th className="text-left p-3 font-medium text-slate-400 sortable" onClick={() => handleSort('isoDate')}>
+                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('isoDate')}>
                             <div className="flex items-center gap-1">Date <SortIcon columnKey="date" /></div>
                           </th>
-                          <th className="text-left p-3 font-medium text-slate-400 sortable" onClick={() => handleSort('description')}>
+                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('description')}>
                             <div className="flex items-center gap-1">Description <SortIcon columnKey="description" /></div>
                           </th>
-                          <th className="text-left p-3 font-medium text-slate-400 sortable" onClick={() => handleSort('category')}>
+                          <th className="text-left p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('category')}>
                             <div className="flex items-center gap-1">Category <SortIcon columnKey="category" /></div>
                           </th>
-                          <th className="text-right p-3 font-medium text-slate-400 sortable" onClick={() => handleSort('amount')}>
+                          <th className="text-right p-4 font-medium text-slate-400 sortable" onClick={() => handleSort('amount')}>
                             <div className="flex items-center gap-1 justify-end">Amount <SortIcon columnKey="amount" /></div>
                           </th>
                         </tr>
@@ -1297,12 +1297,12 @@ export default function Spendsie() {
                       <tbody>
                         {filteredAndSortedTransactions.map((t) => (
                           <tr key={t.id} className="table-row border-t border-white/5">
-                            <td className="p-3 mono text-slate-400 text-xs whitespace-nowrap">{t.date}</td>
-                            <td className="p-3 max-w-[280px] truncate" title={t.description}>{t.description}</td>
-                            <td className="p-3">
+                            <td className="p-4 mono text-slate-400 text-xs whitespace-nowrap">{t.date}</td>
+                            <td className="p-4 max-w-[280px] truncate" title={t.description}>{t.description}</td>
+                            <td className="p-4">
                               {(t.category === 'Money Transfer' || t.category === 'Income') ? (
                                 <span 
-                                  className="px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
+                                  className="px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
                                     background: `${colorSettings[t.category] || colorSettings['Other']}20`,
                                     color: colorSettings[t.category] || colorSettings['Other']
@@ -1314,7 +1314,7 @@ export default function Spendsie() {
                                 </span>
                               ) : (
                                 <span 
-                                  className="px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+                                  className="px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
                                   style={{ 
                                     background: `${colorSettings[t.category] || colorSettings['Other']}20`,
                                     color: colorSettings[t.category] || colorSettings['Other']
@@ -1324,7 +1324,7 @@ export default function Spendsie() {
                                 </span>
                               )}
                             </td>
-                            <td className={`p-3 text-right mono font-medium ${t.isCredit ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <td className={`p-4 text-right mono font-medium ${t.isCredit ? 'text-emerald-400' : 'text-red-400'}`}>
                               {t.isCredit ? '+' : '-'}RM{t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}
                             </td>
                           </tr>
@@ -1342,13 +1342,13 @@ export default function Spendsie() {
             </div>
 
             {/* Uploaded files and statement months */}
-            <div className="mt-6 glass rounded-xl p-4">
-              <div className="flex items-start justify-between gap-4">
+            <div className="mt-8 glass rounded-xl p-5 md:p-6">
+              <div className="flex items-start justify-between gap-6">
                 <div>
-                  <p className="text-sm text-slate-400 mb-2">Uploaded statements:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-sm text-slate-400 mb-3">Uploaded statements:</p>
+                  <div className="flex flex-wrap gap-2.5">
                     {uploadedFiles.map((f, i) => (
-                      <span key={i} className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-full text-xs flex items-center gap-2">
+                      <span key={i} className="px-3 py-1.5 bg-amber-500/10 text-amber-300 rounded-full text-xs flex items-center gap-2">
                         <FileText className="w-3 h-3" />
                         {f.name}
                       </span>
@@ -1357,12 +1357,12 @@ export default function Spendsie() {
                 </div>
                 {statementMonths.length > 0 && (
                   <div className="text-right">
-                    <p className="text-sm text-slate-400 mb-2">Statement months:</p>
-                    <div className="flex flex-wrap gap-2 justify-end">
+                    <p className="text-sm text-slate-400 mb-3">Statement months:</p>
+                    <div className="flex flex-wrap gap-2.5 justify-end">
                       {statementMonths.map((month, i) => (
                         <span 
                           key={i} 
-                          className={`px-3 py-1 rounded-full text-xs cursor-pointer transition-colors ${
+                          className={`px-3 py-1.5 rounded-full text-xs cursor-pointer transition-colors ${
                             monthFilter === month 
                               ? 'bg-amber-500 text-black font-medium' 
                               : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
