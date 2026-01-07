@@ -1044,7 +1044,7 @@ export default function Spendsie() {
             </div>
 
             <div
-              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
+              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift flex items-center justify-center min-h-[280px] ${dragActive ? 'active' : ''}`}
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={() => setDragActive(false)}
@@ -1525,7 +1525,7 @@ export default function Spendsie() {
           </div>
         )}
 
-        <footer className="mt-16 text-center text-sm text-slate-500">
+        <footer className="mt-16 pb-8 text-center text-sm text-slate-500">
           <p>Spendsie • Maybank Statement Analyzer 🇲🇾</p>
           <button
             onClick={() => setShowAdminLogin(true)}
