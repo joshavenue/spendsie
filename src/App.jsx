@@ -976,29 +976,30 @@ export default function Spendsie() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 md:gap-4">
+          <div className="flex flex-wrap items-center" style={{ gap: '12px' }}>
             <button
               onClick={() => setDebugMode(!debugMode)}
-              className={`glass rounded-xl px-3 py-2 text-sm flex items-center gap-2 transition-colors ${debugMode ? 'text-amber-400 border-amber-500/50' : 'text-slate-400 hover:text-white'}`}
+              className={`glass rounded-xl text-sm transition-colors ${debugMode ? 'text-amber-400 border-amber-500/50' : 'text-slate-400 hover:text-white'}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}
             >
               <Bug className="w-4 h-4" />
               <span className="hidden sm:inline">Debug</span>
             </button>
             
-            <div className="glass rounded-xl px-3 md:px-4 py-2 flex items-center gap-2">
+            <div className="glass rounded-xl" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}>
               <Building2 className="w-4 h-4 text-amber-400" />
               <span className="text-sm">🇲🇾 Maybank</span>
             </div>
 
             {transactions.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {isProcessing ? (
-                  <div className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-amber-400 flex items-center gap-2">
+                  <div className="glass rounded-xl text-sm text-amber-400" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}>
                     <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
                     <span className="hidden sm:inline">Processing...</span>
                   </div>
                 ) : (
-                  <label className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-amber-400 hover:text-amber-300 hover:border-amber-500/50 transition-colors flex items-center gap-2 cursor-pointer">
+                  <label className="glass rounded-xl text-sm text-amber-400 hover:text-amber-300 hover:border-amber-500/50 transition-colors cursor-pointer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}>
                     <Upload className="w-4 h-4" />
                     <span className="hidden sm:inline">Upload More</span>
                     <input
@@ -1012,7 +1013,8 @@ export default function Spendsie() {
                 )}
                 <button 
                   onClick={clearData}
-                  className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-slate-400 hover:text-white hover:border-red-500/50 transition-colors flex items-center gap-2"
+                  className="glass rounded-xl text-sm text-slate-400 hover:text-white hover:border-red-500/50 transition-colors"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}
                   disabled={isProcessing}
                 >
                   <X className="w-4 h-4" />
@@ -1229,14 +1231,15 @@ export default function Spendsie() {
                       {stats.pieData.map((item, i) => (
                         <div 
                           key={i} 
-                          className="flex items-center justify-between text-sm cursor-pointer hover:bg-white/5 rounded-lg px-3 py-2 transition-colors"
+                          className="text-sm cursor-pointer hover:bg-white/5 rounded-lg transition-colors"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px' }}
                           onClick={() => setCategoryFilter(categoryFilter === item.name ? 'all' : item.name)}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-3 h-3 rounded-full" style={{ background: colorSettings[item.name] || colorSettings['Other'] }} />
-                            <span className={`text-slate-300 ${categoryFilter === item.name ? 'text-amber-400 font-medium' : ''}`}>{item.name}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0, background: colorSettings[item.name] || colorSettings['Other'] }} />
+                            <span className={`text-slate-300 ${categoryFilter === item.name ? 'text-amber-400 font-medium' : ''}`} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                           </div>
-                          <span className="mono text-slate-400">RM{item.value.toLocaleString()}</span>
+                          <span className="mono text-slate-400" style={{ flexShrink: 0, marginLeft: '8px' }}>RM{item.value.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -1253,14 +1256,15 @@ export default function Spendsie() {
                   <h3 className="font-semibold text-lg">Transactions</h3>
                   
                   <div className="flex flex-wrap items-center gap-3 flex-1 md:justify-end">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                      <Search className="w-4 h-4 text-slate-500" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
                       <input
                         type="text"
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-slate-800/50 border border-white/10 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 w-full md:w-48"
+                        className="bg-slate-800/50 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-amber-500/50"
+                        style={{ paddingLeft: '36px', paddingRight: '16px', paddingTop: '10px', paddingBottom: '10px', width: '180px' }}
                       />
                     </div>
                     
@@ -1269,6 +1273,7 @@ export default function Spendsie() {
                         value={monthFilter}
                         onChange={(e) => setMonthFilter(e.target.value)}
                         className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500/50"
+                        style={{ flexShrink: 0 }}
                       >
                         <option value="all">All Months</option>
                         {statementMonths.map(month => (
@@ -1281,6 +1286,7 @@ export default function Spendsie() {
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
                       className="bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500/50"
+                      style={{ flexShrink: 0 }}
                     >
                       <option value="all">All Categories</option>
                       {stats.categories.map(cat => (
@@ -1315,12 +1321,15 @@ export default function Spendsie() {
                         {filteredAndSortedTransactions.map((t) => (
                           <tr key={t.id} className="table-row border-t border-white/5">
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
-                            <td className="max-w-[280px] truncate" style={{ padding: `${spacingSettings.tableRowPadding}px` }} title={t.description}>{t.description}</td>
+                            <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
                               {(t.category === 'Money Transfer' || t.category === 'Income') ? (
                                 <span 
-                                  className="px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
+                                  className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
+                                    display: 'inline-block',
+                                    padding: '6px 10px',
+                                    whiteSpace: 'nowrap',
                                     background: `${colorSettings[t.category] || colorSettings['Other']}20`,
                                     color: colorSettings[t.category] || colorSettings['Other']
                                   }}
@@ -1331,8 +1340,11 @@ export default function Spendsie() {
                                 </span>
                               ) : (
                                 <span 
-                                  className="px-2.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
+                                  className="rounded-full text-xs font-medium"
                                   style={{ 
+                                    display: 'inline-block',
+                                    padding: '6px 10px',
+                                    whiteSpace: 'nowrap',
                                     background: `${colorSettings[t.category] || colorSettings['Other']}20`,
                                     color: colorSettings[t.category] || colorSettings['Other']
                                   }}
