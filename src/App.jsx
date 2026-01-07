@@ -2,58 +2,233 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Upload, FileText, TrendingUp, Receipt, Sparkles, X, ChevronUp, ChevronDown, ArrowUpDown, Search, Building2, Bug } from 'lucide-react';
 
-// Malaysian-specific category keywords
+// Malaysian-specific category keywords - Expanded
 const CATEGORY_KEYWORDS = {
   'Food & Dining': {
-    keywords: ['restaurant', 'cafe', 'coffee', 'food', 'foodpanda', 'grabfood', 'mcd', 'mcdonalds', 'starbucks', 'kfc', 'pizza', 'sushi', 'dining', 'nandos', 'secret recipe', 'oldtown', 'papparich', 'mamak', 'kopitiam', 'texas chicken', 'burger king', 'domino', 'sushi king', 'kenny rogers', 'the chicken rice'],
+    keywords: [
+      // International Fast Food
+      'restaurant', 'cafe', 'coffee', 'food', 'dining', 'mcd', 'mcdonalds', "mcdonald's", 'kfc', 'pizza', 'pizza hut', 
+      'domino', "domino's", 'burger king', 'subway', 'wendys', "wendy's", 'taco bell', 'carl\'s jr', 'a&w',
+      // Malaysian Fast Food & Chains
+      'marrybrown', 'texas chicken', 'nandos', "nando's", 'kenny rogers', 'the chicken rice shop', 'tcrs',
+      'secret recipe', 'oldtown', 'old town', 'papparich', 'pappa rich', 'mamak', 'kopitiam',
+      // Asian Chains
+      'sushi', 'sushi king', 'sushi zanmai', 'sakae sushi', 'genki sushi', 'boat noodle', 'absolute thai',
+      'kim gary', 'dragon-i', 'paradise inn', 'nan xiang', 'din tai fung', 'ramen', 'ichiban',
+      // Cafes & Coffee
+      'starbucks', 'coffee bean', 'zus coffee', 'zus', 'luckin coffee', 'luckin', 'dôme', 'dome cafe',
+      'san francisco coffee', 'toby\'s estate', 'bean brothers', 'breakfast thieves', 'vCR',
+      // Bubble Tea & Desserts
+      'tealive', 'gong cha', 'tiger sugar', 'the alley', 'daboba', 'liho', 'each a cup', 'coolblog',
+      'chatime', 'share tea', 'koi', 'llao llao', 'baskin robbins', 'haagen dazs', 'inside scoop',
+      // Bakeries
+      'tous les jours', 'lavender', 'rt pastry', 'breadtalk', 'rotiboy', 'komugi', 'barcook',
+      // Food Delivery
+      'foodpanda', 'grabfood', 'shopeefood', 'delivereat',
+      // Local Keywords
+      'restoran', 'kedai makan', 'warung', 'gerai', 'nasi', 'mee', 'laksa', 'char kuey teow',
+      'roti canai', 'dim sum', 'steamboat', 'bbq', 'buffet', 'catering',
+    ],
     priority: 2,
   },
   'Grab/E-hailing': {
-    keywords: ['grab', 'grabcar', 'grabpay', 'gojek', 'maxim', 'indriver'],
+    keywords: ['grab', 'grabcar', 'grabpay', 'gojek', 'maxim', 'indriver', 'airasia ride', 'mula'],
     priority: 1,
   },
   'Petrol': {
-    keywords: ['petrol', 'shell', 'petronas', 'caltex', 'petron', 'bhp', 'fuel'],
+    keywords: ['petrol', 'shell', 'petronas', 'caltex', 'petron', 'bhp', 'fuel', 'setel', 'petrol station', 'gas station'],
     priority: 1,
   },
   'Parking & Toll': {
-    keywords: ['parking', 'toll', 'plus', 'touch n go', 'tng', 'smart tag', 'rfid'],
+    keywords: [
+      'parking', 'toll', 'plus', 'touch n go', 'tng', 'smart tag', 'rfid',
+      'park easy', 'jomparking', 'flexi parking', 'parkson parking', 'carpark',
+      'lpt', 'nkve', 'duke', 'suke', 'mex', 'akleh', 'kesas', 'sprint', 'ldp', 'npe',
+    ],
     priority: 1,
   },
   'Public Transport': {
-    keywords: ['lrt', 'mrt', 'ktm', 'rapidkl', 'prasarana', 'bus', 'transit', 'monorail', 'erl', 'klia ekspres'],
+    keywords: [
+      'lrt', 'mrt', 'ktm', 'rapidkl', 'prasarana', 'bus', 'transit', 'monorail', 
+      'erl', 'klia ekspres', 'klia transit', 'myrapid', 'causeway link', 'aeroline',
+      'kkkl', 'transnasional', 'plusliner', 'nice', 'konsortium',
+    ],
     priority: 1,
   },
   'Online Shopping': {
-    keywords: ['shopee', 'lazada', 'zalora', 'shein', 'taobao', 'aliexpress', 'temu', 'amazon'],
+    keywords: [
+      'shopee', 'lazada', 'zalora', 'shein', 'taobao', 'aliexpress', 'temu', 'amazon',
+      'pg mall', 'lelong', 'carousell', 'mudah', 'hermo', 'althea', 'sephora online',
+      'h&m online', 'uniqlo online', 'asos', 'fashion valet', 'pomelo', 'love bonito',
+    ],
     priority: 1,
   },
   'Retail & Mall': {
-    keywords: ['uniqlo', 'h&m', 'zara', 'cotton on', 'padini', 'nike', 'adidas', 'sephora', 'guardian', 'watsons', 'mr diy', 'daiso', 'ikea', 'harvey norman', 'courts', 'sunway pyramid', 'pavilion', 'mid valley', 'one utama', 'ioi city', 'setia city', 'mall'],
+    keywords: [
+      // Fashion
+      'uniqlo', 'h&m', 'zara', 'cotton on', 'padini', 'nike', 'adidas', 'puma', 'new balance',
+      'bata', 'vincci', 'charles & keith', 'pedro', 'coach', 'michael kors', 'fossil',
+      'brands outlet', 'factory outlet', 'reject shop', 'bundle',
+      // Beauty & Health
+      'sephora', 'guardian', 'watsons', 'caring pharmacy', 'big pharmacy', 'aa pharmacy',
+      // Home & DIY
+      'mr diy', 'mr. diy', 'daiso', 'ikea', 'harvey norman', 'courts', 'homelux', 'homepro',
+      'ace hardware', 'ssf', 'lorenzo', 'cellini', 'zolano',
+      // Electronics
+      'senheng', 'thunder match', 'directd', 'urban republic', 'machines', 'switch', 'istudio',
+      'logitech', 'samsung store', 'oppo', 'xiaomi', 'huawei',
+      // Bookstores
+      'popular', 'mph', 'kinokuniya', 'times bookstore', 'bookxcess',
+      // Sports
+      'decathlon', 'sports direct', 'jd sports', 'al-ikhsan', 'stadium', 'royal sporting house',
+      // Department Stores
+      'parkson', 'isetan', 'sogo', 'metrojaya', 'aeon', 'robinsons',
+      // Malls (generic)
+      'sunway pyramid', 'pavilion', 'mid valley', 'one utama', 'ioi city', 'setia city',
+      'klcc', 'suria klcc', 'the gardens', 'bangsar village', 'nu sentral', 'mytown',
+      'quill city', 'avenue k', 'fahrenheit88', 'lot 10', 'berjaya times square',
+      'sunway velocity', 'dpulze', 'empire', 'the curve', 'ikano', 'citta mall',
+      'mall', 'shopping', 'retail',
+    ],
     priority: 2,
   },
   'Groceries': {
-    keywords: ['jaya grocer', 'village grocer', 'cold storage', 'aeon big', 'aeon', 'giant', 'tesco', 'lotus', 'mydin', 'econsave', '99 speedmart', 'family mart', '7-eleven', 'kk mart', 'supermarket', 'grocer'],
+    keywords: [
+      // Premium
+      'jaya grocer', 'village grocer', 'cold storage', 'ben\'s independent', 'mercato', 'qra',
+      // Hypermarket
+      'aeon big', 'aeon', 'giant', 'tesco', 'lotus', 'mydin', 'econsave', 'nsk', 'lulu',
+      // Value
+      '99 speedmart', '99 speed mart', 'speedmart', 'tf value mart', 'hero market', 'billion',
+      // Convenience
+      'family mart', 'familymart', '7-eleven', '7 eleven', 'kk mart', 'kk super mart',
+      'cu', 'emart24', 'mynews', 'petronas mesra',
+      // Keywords
+      'supermarket', 'grocer', 'grocery', 'pasaraya', 'hypermarket', 'mart', 'minimarket',
+    ],
     priority: 1,
   },
   'Entertainment': {
-    keywords: ['netflix', 'spotify', 'disney', 'youtube', 'cinema', 'gsc', 'tgv', 'mbo', 'movie', 'game', 'steam', 'playstation', 'xbox', 'karaoke'],
+    keywords: [
+      // Streaming
+      'netflix', 'spotify', 'disney', 'disney+', 'youtube', 'youtube premium', 'apple music',
+      'amazon prime', 'hbo', 'hbo go', 'viu', 'wetv', 'iqiyi', 'astro go',
+      // Cinema
+      'cinema', 'gsc', 'golden screen', 'tgv', 'mbo', 'mmcineplexes', 'lotus five star', 'dadi',
+      // Gaming
+      'game', 'steam', 'playstation', 'xbox', 'nintendo', 'razer', 'garena', 'pubg', 
+      'mobile legends', 'genshin', 'riot games', 'epic games', 'twitch',
+      // Recreation
+      'karaoke', 'redbox', 'neway', 'k box', 'bowling', 'arcade', 'timezone', 'mollyfantasy',
+      'escape room', 'theme park', 'sunway lagoon', 'legoland', 'genting', 'resort world',
+      // Events
+      'ticket', 'ticket2u', 'ticketcharge', 'axs', 'myticket', 'concert', 'event',
+    ],
     priority: 1,
   },
   'Healthcare': {
-    keywords: ['clinic', 'hospital', 'pharmacy', 'doctor', 'medical', 'dental', 'kpj', 'pantai', 'gleneagles', 'columbia asia', 'klinik', 'farmasi'],
+    keywords: [
+      // Keywords
+      'clinic', 'hospital', 'pharmacy', 'doctor', 'medical', 'dental', 'dentist', 'klinik', 'farmasi',
+      // Private Hospitals
+      'kpj', 'pantai', 'gleneagles', 'columbia asia', 'sunway medical', 'prince court', 
+      'ijn', 'ijm', 'sjmc', 'assunta', 'beacon', 'tropicana medical', 'thomson',
+      // Clinics
+      'qualitas', 'bp healthcare', 'pathlab', 'clinipath', 'gribbles',
+      // Pharmacies
+      'caring', 'big pharmacy', 'aa pharmacy', 'alpro pharmacy',
+      // Optical
+      'focus point', 'eye hub', 'vision lab', 'optometrist',
+      // Health Screening
+      'health screening', 'medical checkup', 'blood test',
+    ],
     priority: 2,
   },
   'Education': {
-    keywords: ['course', 'udemy', 'coursera', 'tuition', 'school', 'university', 'college', 'education', 'training', 'skillshare'],
+    keywords: [
+      // Online Learning
+      'course', 'udemy', 'coursera', 'skillshare', 'linkedin learning', 'masterclass',
+      // Keywords
+      'tuition', 'school', 'university', 'college', 'education', 'training', 'akademi', 'sekolah',
+      // Local Universities
+      'uitm', 'um', 'usm', 'ukm', 'utm', 'upm', 'uia', 'unimas', 'ums', 'umt',
+      // Private Universities
+      'taylor', 'sunway university', 'sunway college', 'help', 'inti', 'monash', 'nottingham',
+      'ucsi', 'mmu', 'apu', 'limkokwing', 'segi', 'kdu', 'taylors',
+      // Tuition Centers
+      'kumon', 'mental arithmetic', 'abacus',
+    ],
     priority: 2,
   },
   'Insurance': {
-    keywords: ['insurance', 'prudential', 'aia', 'great eastern', 'allianz', 'manulife', 'zurich', 'takaful', 'etiqa', 'policy', 'premium'],
+    keywords: [
+      'insurance', 'insurans', 'prudential', 'aia', 'great eastern', 'allianz', 'manulife', 
+      'zurich', 'takaful', 'etiqa', 'policy', 'premium', 'life insurance', 'motor insurance',
+      'tokio marine', 'msig', 'axa', 'generali', 'fwd', 'hong leong assurance', 'tune protect',
+    ],
     priority: 1,
   },
   'Utilities': {
-    keywords: ['tnb', 'tenaga', 'syabas', 'air selangor', 'indah water', 'unifi', 'maxis', 'celcom', 'digi', 'yes 4g', 'u mobile', 'time', 'astro', 'electricity', 'water', 'internet', 'telco'],
+    keywords: [
+      // Electricity
+      'tnb', 'tenaga', 'tenaga nasional', 'sesb', 'sesco', 'sarawak energy',
+      // Water
+      'syabas', 'air selangor', 'indah water', 'iwk', 'saj', 'sada', 'laku',
+      // Internet & Telco
+      'unifi', 'maxis', 'celcom', 'digi', 'yes 4g', 'u mobile', 'time', 'allo',
+      'hotlink', 'xpax', 'yoodo', 'tune talk',
+      // TV
+      'astro', 'njoi',
+      // Keywords
+      'electricity', 'water', 'internet', 'telco', 'broadband', 'bil', 'utility',
+    ],
+    priority: 1,
+  },
+  'Subscriptions': {
+    keywords: [
+      'subscription', 'adobe', 'microsoft', 'microsoft 365', 'office 365', 'google one',
+      'icloud', 'apple one', 'canva', 'dropbox', 'zoom', 'chatgpt', 'openai',
+      'medium', 'substack', 'patreon', 'onlyfans', 'membership', 'annual fee',
+    ],
+    priority: 1,
+  },
+  'Travel': {
+    keywords: [
+      // Airlines
+      'airasia', 'air asia', 'malaysia airlines', 'mas', 'firefly', 'batik air', 'malindo',
+      'singapore airlines', 'cathay', 'emirates', 'qatar', 'airline', 'flight',
+      // Hotels
+      'agoda', 'booking.com', 'trivago', 'expedia', 'hotels.com', 'airbnb', 'oyo',
+      'marriott', 'hilton', 'shangri-la', 'sheraton', 'westin', 'hyatt', 'ibis',
+      'hotel', 'resort', 'hostel', 'accommodation',
+      // Bus/Train
+      'easybook', 'busonlineticket', 'catchthatbus', 'redbus', 'ktmb',
+      // Car Rental
+      'socar', 'gocar', 'trevo', 'flux', 'mayflower', 'hertz', 'avis', 'car rental',
+      // Travel Agents
+      'tripcom', 'trip.com', 'klook', 'traveloka', 'kkkl',
+    ],
+    priority: 1,
+  },
+  'Gym & Fitness': {
+    keywords: [
+      'gym', 'fitness', 'celebrity fitness', 'fitness first', 'anytime fitness', 
+      'chi fitness', 'true fitness', 'kl fitness', 'jetts', 'f45',
+      'yoga', 'pilates', 'spin', 'crossfit', 'martial arts', 'boxing',
+    ],
+    priority: 1,
+  },
+  'Government': {
+    keywords: [
+      // Tax
+      'lhdn', 'hasil', 'income tax', 'cukai', 'cukai pendapatan',
+      // Road
+      'jpj', 'road tax', 'puspakom', 'myeg', 'pdrm', 'saman', 'summons', 'fine',
+      // Property
+      'cukai tanah', 'cukai taksiran', 'assessment', 'quit rent', 'mbpj', 'mbsa', 'dbkl', 'mpkj',
+      // Others
+      'kwsp', 'perkeso', 'socso', 'zakat', 'fitrah',
+    ],
     priority: 1,
   },
   'PTPTN': {
@@ -61,24 +236,67 @@ const CATEGORY_KEYWORDS = {
     priority: 1,
   },
   'EPF/KWSP': {
-    keywords: ['kwsp', 'epf', 'kumpulan wang simpan'],
+    keywords: ['kwsp', 'epf', 'kumpulan wang simpan', 'employees provident'],
     priority: 1,
   },
   'Money Transfer': {
-    keywords: ['fund transfer', 'ibk fund trf', 'ibk fund tfr', 'duitnow', 'mae qr', 'fpx payment', 'transfer from', 'transfer to', 'transfer fr'],
+    keywords: [
+      'fund transfer', 'ibk fund trf', 'ibk fund tfr', 'duitnow', 'mae qr', 'fpx payment',
+      'transfer from', 'transfer to', 'transfer fr', 'instant transfer', 'ibg',
+      'wise', 'remittance', 'western union', 'moneygram', 'worldremit',
+    ],
     priority: 1,
   },
   'Income': {
-    keywords: ['salary', 'gaji', 'cr pymt', 'cash deposit', 'interest paid', 'interest earned', 'refund', 'cashback', 'rebate'],
+    keywords: [
+      'salary', 'gaji', 'cr pymt', 'cash deposit', 'interest paid', 'interest earned',
+      'refund', 'cashback', 'rebate', 'dividend', 'bonus', 'commission', 'allowance',
+      'reimbursement', 'claim', 'payment received', 'credit',
+    ],
     priority: 2,
   },
   'ATM/Cash': {
-    keywords: ['atm', 'cash withdrawal', 'withdraw', 'pengeluaran'],
+    keywords: ['atm', 'cash withdrawal', 'withdraw', 'pengeluaran', 'cash out', 'cwd'],
     priority: 1,
   },
   'Fees & Charges': {
-    keywords: ['fee', 'charge', 'service charge', 'annual fee', 'stamp duty', 'duti setem', 'caj', 'direct debit', 'cms-direct'],
+    keywords: [
+      'fee', 'charge', 'service charge', 'annual fee', 'stamp duty', 'duti setem',
+      'caj', 'direct debit', 'cms-direct', 'late payment', 'penalty', 'interest charge',
+      'processing fee', 'admin fee', 'bank charge',
+    ],
     priority: 1,
+  },
+  'Investment': {
+    keywords: [
+      'investment', 'pelaburan', 'unit trust', 'asnb', 'asb', 'amanah saham',
+      'pnb', 'stock', 'share', 'trading', 'rakuten', 'mplus', 'cgs-cimb',
+      'maybank trade', 'hle', 'fundsupermart', 'stashaway', 'wahed', 'versa',
+      'robo advisor', 'crypto', 'bitcoin', 'luno', 'tokenize',
+    ],
+    priority: 2,
+  },
+  'Loan & Credit': {
+    keywords: [
+      'loan', 'pinjaman', 'instalment', 'ansuran', 'hire purchase', 'mortgage',
+      'housing loan', 'car loan', 'personal loan', 'credit card', 'bnpl',
+      'atome', 'grabpay later', 'shopee paylater', 'split', 'pay later',
+    ],
+    priority: 2,
+  },
+  'Pets': {
+    keywords: [
+      'pet', 'veterinar', 'vet', 'pet shop', 'pet food', 'petster', 'pet lovers',
+      'grooming', 'pet boarding',
+    ],
+    priority: 2,
+  },
+  'Religious': {
+    keywords: [
+      'mosque', 'masjid', 'church', 'temple', 'zakat', 'sedekah', 'donation',
+      'wakaf', 'tabung haji', 'th', 'haj', 'umrah', 'tithe',
+    ],
+    priority: 2,
   },
 };
 
@@ -96,12 +314,20 @@ const CATEGORY_COLORS = {
   'Education': '#FF9800',
   'Insurance': '#673AB7',
   'Utilities': '#607D8B',
+  'Subscriptions': '#9C27B0',
+  'Travel': '#00ACC1',
+  'Gym & Fitness': '#FF5722',
+  'Government': '#455A64',
   'PTPTN': '#795548',
   'EPF/KWSP': '#8BC34A',
   'Money Transfer': '#78909C',
   'Income': '#4CAF50',
   'ATM/Cash': '#FFC107',
   'Fees & Charges': '#F44336',
+  'Investment': '#1E88E5',
+  'Loan & Credit': '#D32F2F',
+  'Pets': '#8D6E63',
+  'Religious': '#7E57C2',
   'Other': '#BDC3C7',
 };
 
