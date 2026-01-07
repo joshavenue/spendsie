@@ -946,29 +946,29 @@ export default function Spendsie() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center glow-amber">
-              <Receipt className="w-6 h-6 text-slate-900" />
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center glow-amber">
+              <Receipt className="w-5 h-5 md:w-6 md:h-6 text-slate-900" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Spendsie</h1>
-              <p className="text-sm text-slate-400">Maybank Statement Analyzer</p>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Spendsie</h1>
+              <p className="text-xs md:text-sm text-slate-400">Maybank Statement Analyzer</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
             <button
               onClick={() => setDebugMode(!debugMode)}
               className={`glass rounded-xl px-3 py-2 text-sm flex items-center gap-2 transition-colors ${debugMode ? 'text-amber-400 border-amber-500/50' : 'text-slate-400 hover:text-white'}`}
             >
               <Bug className="w-4 h-4" />
-              Debug
+              <span className="hidden sm:inline">Debug</span>
             </button>
             
-            <div className="glass rounded-xl px-4 py-2 flex items-center gap-2">
+            <div className="glass rounded-xl px-3 md:px-4 py-2 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-amber-400" />
               <span className="text-sm">🇲🇾 Maybank</span>
             </div>
@@ -976,14 +976,14 @@ export default function Spendsie() {
             {transactions.length > 0 && (
               <div className="flex items-center gap-2">
                 {isProcessing ? (
-                  <div className="glass rounded-xl px-4 py-2 text-sm text-amber-400 flex items-center gap-2">
+                  <div className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-amber-400 flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                    Processing...
+                    <span className="hidden sm:inline">Processing...</span>
                   </div>
                 ) : (
-                  <label className="glass rounded-xl px-4 py-2 text-sm text-amber-400 hover:text-amber-300 hover:border-amber-500/50 transition-colors flex items-center gap-2 cursor-pointer">
+                  <label className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-amber-400 hover:text-amber-300 hover:border-amber-500/50 transition-colors flex items-center gap-2 cursor-pointer">
                     <Upload className="w-4 h-4" />
-                    Upload More
+                    <span className="hidden sm:inline">Upload More</span>
                     <input
                       type="file"
                       accept=".pdf,.csv,.txt"
@@ -995,11 +995,11 @@ export default function Spendsie() {
                 )}
                 <button 
                   onClick={clearData}
-                  className="glass rounded-xl px-4 py-2 text-sm text-slate-400 hover:text-white hover:border-red-500/50 transition-colors flex items-center gap-2"
+                  className="glass rounded-xl px-3 md:px-4 py-2 text-sm text-slate-400 hover:text-white hover:border-red-500/50 transition-colors flex items-center gap-2"
                   disabled={isProcessing}
                 >
                   <X className="w-4 h-4" />
-                  Clear
+                  <span className="hidden sm:inline">Clear</span>
                 </button>
               </div>
             )}
@@ -1044,7 +1044,7 @@ export default function Spendsie() {
             </div>
 
             <div
-              className={`upload-zone rounded-2xl p-12 text-center cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
+              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={() => setDragActive(false)}
@@ -1061,25 +1061,25 @@ export default function Spendsie() {
               />
               
               {isProcessing ? (
-                <div>
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center relative overflow-hidden">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center relative overflow-hidden">
                     <FileText className="w-10 h-10 text-amber-400 animate-pulse" />
                   </div>
                   <p className="text-xl font-medium text-amber-400 mb-2">Processing document...</p>
                   <p className="text-sm text-slate-400">{processingStatus}</p>
                 </div>
               ) : (
-                <>
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center animate-float">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center animate-float">
                     <Upload className="w-10 h-10 text-amber-400" />
                   </div>
-                  <p className="text-xl font-medium mb-2">Drop your Maybank statement here</p>
-                  <p className="text-slate-400 mb-6">or click to browse • PDF supported</p>
+                  <p className="text-xl font-medium mb-2 text-center">Drop your Maybank statement here</p>
+                  <p className="text-slate-400 mb-6 text-center">or click to browse • PDF supported</p>
                   <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
                     <FileText className="w-4 h-4" />
                     <span>Reads PDF text with spatial reconstruction</span>
                   </div>
-                </>
+                </div>
               )}
             </div>
 
@@ -1128,7 +1128,7 @@ export default function Spendsie() {
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12">
               {[
                 { icon: <FileText className="w-5 h-5" />, title: 'PDF Reading', desc: 'Smart text extraction' },
                 { icon: <ArrowUpDown className="w-5 h-5" />, title: 'Auto-categorize', desc: 'MY merchants' },
@@ -1147,33 +1147,33 @@ export default function Spendsie() {
         ) : (
           <div>
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-4 mb-8">
-              <div className="glass rounded-2xl p-6 hover-lift">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
                 <p className="text-slate-400 text-sm mb-2">Total Spending</p>
-                <p className="text-3xl font-bold mono text-red-400">
+                <p className="text-xl md:text-3xl font-bold mono text-red-400">
                   RM{stats.totalSpending.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-6 hover-lift">
+              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
                 <p className="text-slate-400 text-sm mb-2">Total Income</p>
-                <p className="text-3xl font-bold mono text-emerald-400">
+                <p className="text-xl md:text-3xl font-bold mono text-emerald-400">
                   RM{stats.totalIncome.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-6 hover-lift">
+              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
                 <p className="text-slate-400 text-sm mb-2">Net Flow</p>
-                <p className={`text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p className={`text-xl md:text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   RM{(stats.totalIncome - stats.totalSpending).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl p-6 hover-lift">
+              <div className="glass rounded-2xl p-4 md:p-6 hover-lift">
                 <p className="text-slate-400 text-sm mb-2">Transactions</p>
-                <p className="text-3xl font-bold mono">{transactions.length}</p>
+                <p className="text-xl md:text-3xl font-bold mono">{transactions.length}</p>
               </div>
             </div>
 
             {/* Chart + Table */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="glass rounded-2xl p-6">
                 <h3 className="font-semibold mb-4">Spending Breakdown</h3>
                 {stats.pieData.length > 0 ? (
@@ -1228,11 +1228,11 @@ export default function Spendsie() {
                 )}
               </div>
 
-              <div className="col-span-2 glass rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4 gap-4">
+              <div className="lg:col-span-2 glass rounded-2xl p-4 md:p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                   <h3 className="font-semibold">Transactions</h3>
                   
-                  <div className="flex items-center gap-3 flex-1 justify-end">
+                  <div className="flex flex-wrap items-center gap-3 flex-1 md:justify-end">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
@@ -1240,7 +1240,7 @@ export default function Spendsie() {
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="bg-slate-800/50 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-amber-500/50 w-48"
+                        className="bg-slate-800/50 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-amber-500/50 w-full md:w-48"
                       />
                     </div>
                     
