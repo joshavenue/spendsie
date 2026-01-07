@@ -1032,19 +1032,21 @@ export default function Spendsie() {
         )}
 
         {transactions.length === 0 ? (
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-4xl font-bold mb-4">
-                Analyze your<br />
-                <span className="gradient-text">Maybank statements</span>
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Upload your Maybank PDF statement and get instant spending insights.
-              </p>
-            </div>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: '672px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                <h2 className="text-4xl font-bold mb-4">
+                  Analyze your<br />
+                  <span className="gradient-text">Maybank statements</span>
+                </h2>
+                <p className="text-slate-400 text-lg">
+                  Upload your Maybank PDF statement and get instant spending insights.
+                </p>
+              </div>
 
             <div
-              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift flex items-center justify-center min-h-[280px] ${dragActive ? 'active' : ''}`}
+              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px' }}
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={() => setDragActive(false)}
@@ -1134,14 +1136,15 @@ export default function Spendsie() {
                 { icon: <ArrowUpDown className="w-5 h-5" />, title: 'Auto-categorize', desc: 'MY merchants' },
                 { icon: <Sparkles className="w-5 h-5" />, title: 'Visual breakdown', desc: 'Charts & insights' },
               ].map((f, i) => (
-                <div key={i} className="glass rounded-xl p-4 text-center">
-                  <div className="w-10 h-10 mx-auto mb-3 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <div key={i} className="glass rounded-xl p-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <div className="w-10 h-10 mb-3 rounded-lg bg-amber-500/10 text-amber-400" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {f.icon}
                   </div>
                   <p className="font-medium text-sm">{f.title}</p>
                   <p className="text-xs text-slate-500">{f.desc}</p>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         ) : (
