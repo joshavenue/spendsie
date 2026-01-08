@@ -1145,7 +1145,7 @@ export default function Spendsie() {
     }
     
     const spending = filteredForStats.filter(t => !t.isCredit);
-    const income = filteredForStats.filter(t => t.isCredit);
+    const income = filteredForStats.filter(t => t.isCredit && t.category !== 'Refund');
     
     const totalSpending = spending.reduce((sum, t) => sum + t.amount, 0);
     const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
