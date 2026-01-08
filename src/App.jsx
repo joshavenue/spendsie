@@ -470,6 +470,7 @@ export default function Spendsie() {
   const [transactionsExpanded, setTransactionsExpanded] = useState(false);
   const [categorySettings, setCategorySettings] = useState(CATEGORY_KEYWORDS);
   const [colorSettings, setColorSettings] = useState(CATEGORY_COLORS);
+  const [openDropdownId, setOpenDropdownId] = useState(null); // Track which dropdown is open
   const [uiColors, setUiColors] = useState({
     accent: '#F59E0B', // amber
     accentLight: '#FCD34D',
@@ -741,47 +742,24 @@ export default function Spendsie() {
     setAccountType(null);
   };
 
-  // Toggle category cycle:
-  // Company: Transfer Out → Transfer In → Income → Payments → Transfer Out
-  // Personal: Transfer Out → Transfer In → Income → Transfer Out
-  // Refund: Refund → Transfer Out (if desc has "refund", can toggle back)
-  const toggleTransferIncome = (transactionId) => {
+  // Change transaction category via dropdown
+  const changeTransactionCategory = (transactionId, newCategory) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
-        const hasRefundInDesc = t.description.toLowerCase().includes('refund');
-        
-        if (t.category === 'Refund') {
-          // Refund -> Transfer Out
-          return { ...t, category: 'Transfer Out', isCredit: false };
-        } else if (t.category === 'Transfer Out') {
-          // If original description had "refund", toggle back to Refund
-          if (hasRefundInDesc) {
-            return { ...t, category: 'Refund', isCredit: true };
-          }
-          // Transfer Out -> Transfer In
-          return { ...t, category: 'Transfer In', isCredit: true };
-        } else if (t.category === 'Transfer In') {
-          // Transfer In -> Income
-          return { ...t, category: 'Income', isCredit: true };
-        } else if (t.category === 'Income') {
-          // For company: Income -> Payments
-          // For personal: Income -> Transfer Out
-          if (accountType === 'company') {
-            return { ...t, category: 'Payments', isCredit: false };
-          } else {
-            return { ...t, category: 'Transfer Out', isCredit: false };
-          }
-        } else if (t.category === 'Payments') {
-          // Payments -> Transfer Out (company accounts)
-          return { ...t, category: 'Transfer Out', isCredit: false };
-        } else if (t.category === 'Payment') {
-          // Payment -> Income (personal accounts)
-          return { ...t, category: 'Income', isCredit: true };
-        }
+        // Determine if the new category should be credit (positive) or debit (negative)
+        const creditCategories = ['Income', 'Transfer In', 'Refund', 'Payments'];
+        const isCredit = creditCategories.includes(newCategory);
+        return { ...t, category: newCategory, isCredit };
       }
       return t;
     }));
+    setOpenDropdownId(null); // Close dropdown after selection
   };
+
+  // Get available categories based on account type
+  const availableCategories = useMemo(() => {
+    return Object.keys(colorSettings).sort();
+  }, [colorSettings]);
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -1388,45 +1366,50 @@ export default function Spendsie() {
                           <tr key={t.id} className="table-row border-t border-white/5">
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
-                            <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
-                              {(t.category === 'Transfer Out' || t.category === 'Transfer In' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments' || t.category === 'Payment') ? (
-                                <span 
-                                  className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
-                                  style={{ 
-                                    display: 'inline-block',
-                                    padding: '6px 10px',
-                                    whiteSpace: 'nowrap',
-                                    background: `${colorSettings[t.category] || colorSettings['Payment']}20`,
-                                    color: colorSettings[t.category] || colorSettings['Payment']
-                                  }}
-                                  onClick={() => toggleTransferIncome(t.id)}
-                                  title={
-                                    t.category === 'Refund' 
-                                      ? 'Click to cycle: Refund → Transfer Out' 
-                                      : t.category === 'Payment'
-                                        ? 'Click to change to Income'
-                                        : t.category === 'Transfer Out' && t.description.toLowerCase().includes('refund')
-                                          ? 'Click to cycle: Transfer Out → Refund'
-                                          : accountType === 'company'
-                                            ? 'Click to cycle: Transfer Out → Transfer In → Income → Payments'
-                                            : 'Click to cycle: Transfer Out → Transfer In → Income'
-                                  }
-                                >
-                                  {t.category} ⇄
-                                </span>
-                              ) : (
-                                <span 
-                                  className="rounded-full text-xs font-medium"
-                                  style={{ 
-                                    display: 'inline-block',
-                                    padding: '6px 10px',
-                                    whiteSpace: 'nowrap',
-                                    background: `${colorSettings[t.category] || colorSettings['Payment']}20`,
-                                    color: colorSettings[t.category] || colorSettings['Payment']
-                                  }}
-                                >
-                                  {t.category}
-                                </span>
+                            <td style={{ padding: `${spacingSettings.tableRowPadding}px`, position: 'relative' }}>
+                              <span 
+                                className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
+                                style={{ 
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '6px 10px',
+                                  whiteSpace: 'nowrap',
+                                  background: `${colorSettings[t.category] || colorSettings['Payment']}20`,
+                                  color: colorSettings[t.category] || colorSettings['Payment']
+                                }}
+                                onClick={() => setOpenDropdownId(openDropdownId === t.id ? null : t.id)}
+                                title="Click to change category"
+                              >
+                                {t.category}
+                                <ChevronDown className="w-3 h-3" />
+                              </span>
+                              
+                              {/* Category Dropdown Menu */}
+                              {openDropdownId === t.id && (
+                                <>
+                                  {/* Backdrop to close dropdown */}
+                                  <div 
+                                    className="fixed inset-0 z-40" 
+                                    onClick={() => setOpenDropdownId(null)}
+                                  />
+                                  <div className="category-dropdown absolute left-0 top-full mt-1 z-50 bg-slate-800 border border-white/10 rounded-lg shadow-xl py-1 min-w-[180px] max-h-[300px] overflow-y-auto">
+                                    {availableCategories.map((cat) => (
+                                      <button
+                                        key={cat}
+                                        className={`w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors flex items-center gap-2 ${t.category === cat ? 'bg-white/5' : ''}`}
+                                        onClick={() => changeTransactionCategory(t.id, cat)}
+                                      >
+                                        <span 
+                                          className="w-3 h-3 rounded-full flex-shrink-0"
+                                          style={{ background: colorSettings[cat] }}
+                                        />
+                                        <span style={{ color: colorSettings[cat] }}>{cat}</span>
+                                        {t.category === cat && <span className="ml-auto text-emerald-400">✓</span>}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </>
                               )}
                             </td>
                             <td className={`text-right mono font-medium ${t.isCredit ? 'text-emerald-400' : 'text-red-400'}`} style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
