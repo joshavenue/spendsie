@@ -315,10 +315,9 @@ const CATEGORY_KEYWORDS = {
 const COMPANY_CATEGORY_KEYWORDS = {
   'Payments': {
     keywords: [
-      // Client payments (money in)
-      'transfer to a/c', 'fund transfer to', 'ibk fund tfr to', 'payment received',
-      'sales', 'invoice', 'customer payment', 'client payment', 'cr pymt',
-      'cash deposit', 'cheque deposit', 'interest earned', 'interest paid',
+      // Client payments (money in) - specific payment indicators
+      'payment received', 'sales', 'invoice', 'customer payment', 'client payment', 
+      'cr pymt', 'cash deposit', 'cheque deposit', 'interest earned', 'interest paid',
       // Vendor payments (money out)
       'supplier', 'vendor', 'purchase', 'inventory', 'stock', 'raw material',
       'wholesale', 'distributor', 'manufacturer',
@@ -438,8 +437,8 @@ const COMPANY_CATEGORY_KEYWORDS = {
   'Money Transfer': {
     keywords: [
       'fund transfer', 'ibk fund', 'duitnow', 'fpx payment',
-      'transfer from', 'transfer fr a/c', 'instant transfer', 'ibg',
-      'wise', 'remittance', 'telegraphic transfer', 'tt',
+      'transfer from', 'transfer fr a/c', 'transfer to a/c', 'transfer to',
+      'instant transfer', 'ibg', 'wise', 'remittance', 'telegraphic transfer',
     ],
     priority: 1,
   },
@@ -496,6 +495,7 @@ const COMPANY_CATEGORY_COLORS = {
   'Insurance': '#673AB7',
   'Loan Repayment': '#D32F2F',
   'Money Transfer': '#78909C',
+  'Income': '#4CAF50',
   'Refund': '#26A69A',
   'Payment': '#BDC3C7',
 };
@@ -1240,31 +1240,33 @@ export default function Spendsie() {
     setAccountType(null);
   };
 
-  // Toggle category between Money Transfer and Income (personal) or Payments (company)
-  // Also handles Refund toggle. Flips isCredit so it affects Total Income/Spending calculations
+  // Toggle category cycle:
+  // Company: Payments → Money Transfer → Income → Payments
+  // Personal: Money Transfer → Income → Money Transfer
+  // Refund: Refund → Money Transfer (if desc has "refund", can toggle back)
   const toggleTransferIncome = (transactionId) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
         const hasRefundInDesc = t.description.toLowerCase().includes('refund');
         
         if (t.category === 'Refund') {
-          // Refund -> Money Transfer: user is refunding someone (outgoing)
+          // Refund -> Money Transfer
           return { ...t, category: 'Money Transfer', isCredit: false };
         } else if (t.category === 'Money Transfer') {
           // If original description had "refund", toggle back to Refund
           if (hasRefundInDesc) {
             return { ...t, category: 'Refund', isCredit: true };
           }
-          // For company accounts: Money Transfer -> Payments
-          // For personal accounts: Money Transfer -> Income
+          // Money Transfer -> Income (both account types)
+          return { ...t, category: 'Income', isCredit: true };
+        } else if (t.category === 'Income') {
+          // For company: Income -> Payments
+          // For personal: Income -> Money Transfer
           if (accountType === 'company') {
             return { ...t, category: 'Payments', isCredit: true };
           } else {
-            return { ...t, category: 'Income', isCredit: true };
+            return { ...t, category: 'Money Transfer', isCredit: false };
           }
-        } else if (t.category === 'Income') {
-          // Income -> Money Transfer (personal accounts)
-          return { ...t, category: 'Money Transfer', isCredit: false };
         } else if (t.category === 'Payments') {
           // Payments -> Money Transfer (company accounts)
           return { ...t, category: 'Money Transfer', isCredit: false };
@@ -1946,11 +1948,9 @@ export default function Spendsie() {
                                       ? 'Click to toggle: Refund → Money Transfer' 
                                       : t.category === 'Money Transfer' && t.description.toLowerCase().includes('refund')
                                         ? 'Click to toggle: Money Transfer → Refund'
-                                        : t.category === 'Payments'
-                                          ? 'Click to toggle: Payments ↔ Money Transfer'
-                                          : accountType === 'company'
-                                            ? 'Click to toggle: Money Transfer ↔ Payments'
-                                            : 'Click to toggle: Money Transfer ↔ Income'
+                                        : accountType === 'company'
+                                          ? 'Click to cycle: Payments → Money Transfer → Income'
+                                          : 'Click to toggle: Money Transfer ↔ Income'
                                   }
                                 >
                                   {t.category} ⇄
