@@ -1279,6 +1279,9 @@ export default function Spendsie() {
         } else if (t.category === 'Payments') {
           // Payments -> Transfer Out (company accounts)
           return { ...t, category: 'Transfer Out', isCredit: false };
+        } else if (t.category === 'Payment') {
+          // Payment -> Income (personal accounts)
+          return { ...t, category: 'Income', isCredit: true };
         }
       }
       return t;
@@ -1891,7 +1894,7 @@ export default function Spendsie() {
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
-                              {(t.category === 'Transfer Out' || t.category === 'Transfer In' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments') ? (
+                              {(t.category === 'Transfer Out' || t.category === 'Transfer In' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments' || t.category === 'Payment') ? (
                                 <span 
                                   className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
@@ -1905,11 +1908,13 @@ export default function Spendsie() {
                                   title={
                                     t.category === 'Refund' 
                                       ? 'Click to cycle: Refund → Transfer Out' 
-                                      : t.category === 'Transfer Out' && t.description.toLowerCase().includes('refund')
-                                        ? 'Click to cycle: Transfer Out → Refund'
-                                        : accountType === 'company'
-                                          ? 'Click to cycle: Transfer Out → Transfer In → Income → Payments'
-                                          : 'Click to cycle: Transfer Out → Transfer In → Income'
+                                      : t.category === 'Payment'
+                                        ? 'Click to change to Income'
+                                        : t.category === 'Transfer Out' && t.description.toLowerCase().includes('refund')
+                                          ? 'Click to cycle: Transfer Out → Refund'
+                                          : accountType === 'company'
+                                            ? 'Click to cycle: Transfer Out → Transfer In → Income → Payments'
+                                            : 'Click to cycle: Transfer Out → Transfer In → Income'
                                   }
                                 >
                                   {t.category} ⇄
