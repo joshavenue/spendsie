@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Upload, FileText, TrendingUp, Receipt, Sparkles, X, ChevronUp, ChevronDown, ArrowUpDown, Search, Building2, Bug, User } from 'lucide-react';
 
