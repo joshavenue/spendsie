@@ -742,6 +742,7 @@ export default function Spendsie() {
   const [ocrLog, setOcrLog] = useState([]);
   const [statementMonths, setStatementMonths] = useState([]);
   const [monthFilter, setMonthFilter] = useState('all');
+  const [transactionsExpanded, setTransactionsExpanded] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -1164,6 +1165,25 @@ export default function Spendsie() {
     return { totalSpending, totalIncome, pieData, categories };
   }, [transactions, monthFilter]);
 
+  // Calculate transaction counts per month
+  const transactionsByMonth = useMemo(() => {
+    const counts = {};
+    transactions.forEach(t => {
+      if (t.statementMonth) {
+        counts[t.statementMonth] = (counts[t.statementMonth] || 0) + 1;
+      }
+    });
+    // Sort by date (newest first)
+    return Object.entries(counts)
+      .sort((a, b) => {
+        const [monthA, yearA] = a[0].split(' ');
+        const [monthB, yearB] = b[0].split(' ');
+        const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        if (yearA !== yearB) return parseInt(yearB) - parseInt(yearA);
+        return monthOrder.indexOf(monthB) - monthOrder.indexOf(monthA);
+      });
+  }, [transactions]);
+
   const SortIcon = ({ columnKey }) => {
     const actualKey = columnKey === 'date' ? 'isoDate' : columnKey;
     if (sortConfig.key !== actualKey) return <ArrowUpDown className="w-3 h-3 text-slate-500" />;
@@ -1454,9 +1474,40 @@ export default function Spendsie() {
                   RM{(stats.totalIncome - stats.totalSpending).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
-              <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
-                <p className="text-slate-400 text-sm mb-3">Transactions</p>
+              <div 
+                className="glass rounded-2xl hover-lift cursor-pointer transition-all"
+                style={{ padding: `${spacingSettings.statsCardPadding}px` }}
+                onClick={() => setTransactionsExpanded(!transactionsExpanded)}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-slate-400 text-sm">Transactions</p>
+                  <ChevronDown 
+                    className={`w-4 h-4 text-slate-400 transition-transform ${transactionsExpanded ? 'rotate-180' : ''}`} 
+                  />
+                </div>
                 <p className="text-2xl md:text-3xl font-bold mono">{transactions.length}</p>
+                
+                {transactionsExpanded && transactionsByMonth.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-2 max-h-48 overflow-y-auto">
+                    {transactionsByMonth.map(([month, count]) => (
+                      <div 
+                        key={month} 
+                        className="flex items-center justify-between text-sm hover:bg-white/5 rounded-lg px-2 py-1.5 cursor-pointer transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMonthFilter(monthFilter === month ? 'all' : month);
+                        }}
+                      >
+                        <span className={`text-slate-300 ${monthFilter === month ? 'text-amber-400 font-medium' : ''}`}>
+                          {month}
+                        </span>
+                        <span className={`mono ${monthFilter === month ? 'text-amber-400 font-medium' : 'text-slate-400'}`}>
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
