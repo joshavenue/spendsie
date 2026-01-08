@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Upload, FileText, TrendingUp, Receipt, Sparkles, X, ChevronUp, ChevronDown, ArrowUpDown, Search, Building2, Bug } from 'lucide-react';
+import { Upload, FileText, TrendingUp, Receipt, Sparkles, X, ChevronUp, ChevronDown, ArrowUpDown, Search, Building2, Bug, User } from 'lucide-react';
 
 // Malaysian-specific category keywords - Expanded
 const CATEGORY_KEYWORDS = {
@@ -311,6 +311,144 @@ const CATEGORY_KEYWORDS = {
   },
 };
 
+// Company/Business-specific category keywords
+const COMPANY_CATEGORY_KEYWORDS = {
+  'Payments': {
+    keywords: [
+      // Client payments (money in)
+      'transfer to a/c', 'fund transfer to', 'ibk fund tfr to', 'payment received',
+      'sales', 'invoice', 'customer payment', 'client payment', 'cr pymt',
+      'cash deposit', 'cheque deposit', 'interest earned', 'interest paid',
+      // Vendor payments (money out)
+      'supplier', 'vendor', 'purchase', 'inventory', 'stock', 'raw material',
+      'wholesale', 'distributor', 'manufacturer',
+    ],
+    priority: 2,
+  },
+  'Expenses': {
+    keywords: [
+      // Office expenses
+      'office', 'stationery', 'printing', 'photocopy', 'supplies', 'cleaning',
+      'maintenance', 'repair', 'pest control', 'security', 'aircon', 'pantry',
+      'water dispenser', 'mr diy', 'daiso', 'popular', 'officeworks',
+      // Marketing & Ads
+      'marketing', 'advertising', 'ads', 'advertisement', 'promotion',
+      'facebook ads', 'google ads', 'instagram', 'social media', 'billboard',
+      'flyer', 'brochure', 'banner', 'signage', 'sponsorship', 'event',
+      'exhibition', 'trade show', 'booth', 'merchandise',
+      // Business Travel
+      'airasia', 'air asia', 'malaysia airlines', 'flight', 'airline',
+      'agoda', 'booking.com', 'hotel', 'accommodation', 'travel', 'trip',
+      'mileage', 'transport', 'grab', 'taxi', 'parking', 'toll',
+      // Software & Tools
+      'software', 'subscription', 'saas', 'license', 'adobe', 'microsoft',
+      'microsoft 365', 'office 365', 'google workspace', 'zoom', 'slack',
+      'canva', 'dropbox', 'cloud', 'hosting', 'domain', 'website',
+      'sql anywhere', 'autocount', 'ubs', 'myob', 'quickbooks',
+    ],
+    priority: 2,
+  },
+  'Payroll & Staff': {
+    keywords: [
+      'salary', 'gaji', 'wages', 'payroll', 'staff', 'employee', 'bonus',
+      'commission', 'allowance', 'overtime', 'epf', 'kwsp', 'socso', 'perkeso',
+      'eis', 'pcb', 'hrdf',
+    ],
+    priority: 1,
+  },
+  'Rent & Property': {
+    keywords: [
+      'rent', 'sewa', 'rental', 'lease', 'tenancy', 'deposit', 'landlord',
+      'property', 'building', 'premise', 'warehouse', 'factory', 'shop lot',
+    ],
+    priority: 1,
+  },
+  'Equipment & Assets': {
+    keywords: [
+      'equipment', 'machinery', 'computer', 'laptop', 'printer', 'furniture',
+      'fixture', 'vehicle', 'car', 'lorry', 'truck', 'forklift', 'tool',
+      'machine', 'asset', 'capital', 'senheng', 'harvey norman', 'machines',
+    ],
+    priority: 2,
+  },
+  'Professional Services': {
+    keywords: [
+      'legal', 'lawyer', 'solicitor', 'accounting', 'accountant', 'audit',
+      'consultant', 'consulting', 'advisory', 'secretary', 'corporate secretary',
+      'company secretary', 'tax agent', 'hr consultant', 'it consultant',
+    ],
+    priority: 1,
+  },
+  'Tax & Government': {
+    keywords: [
+      'lhdn', 'hasil', 'income tax', 'corporate tax', 'cukai', 'ssm',
+      'suruhanjaya syarikat', 'company commission', 'annual return',
+      'jpj', 'road tax', 'dbkl', 'mbpj', 'mbsa', 'mpkj', 'assessment',
+      'cukai taksiran', 'cukai tanah', 'quit rent', 'license', 'lesen',
+      'permit', 'myeg', 'saman', 'fine', 'penalty',
+    ],
+    priority: 1,
+  },
+  'Owner\'s Draw': {
+    keywords: [
+      'own', 'owner', 'director', 'shareholder', 'dividend', 'drawing',
+      'personal', 'private',
+    ],
+    priority: 3,
+  },
+  'Bank Fees': {
+    keywords: [
+      'fee', 'charge', 'bank charge', 'service charge', 'annual fee',
+      'stamp duty', 'duti setem', 'caj', 'commission', 'interest charge',
+      'loan interest', 'overdraft', 'facility fee', 'processing fee',
+    ],
+    priority: 1,
+  },
+  'Utilities': {
+    keywords: [
+      'tnb', 'tenaga', 'electricity', 'syabas', 'air selangor', 'water',
+      'unifi', 'maxis', 'celcom', 'digi', 'internet', 'broadband', 'telco',
+      'astro', 'indah water', 'iwk', 'bil', 'utility',
+    ],
+    priority: 1,
+  },
+  'Petrol/EV': {
+    keywords: [
+      'petrol', 'diesel', 'fuel', 'shell', 'petronas', 'caltex', 'petron',
+      'setel', 'sonicboom', 'ev charging', 'chargev',
+    ],
+    priority: 1,
+  },
+  'Insurance': {
+    keywords: [
+      'insurance', 'insurans', 'takaful', 'fire insurance', 'business insurance',
+      'public liability', 'professional indemnity', 'workmen compensation',
+      'motor insurance', 'cargo insurance', 'etiqa', 'allianz', 'prudential',
+    ],
+    priority: 1,
+  },
+  'Loan Repayment': {
+    keywords: [
+      'loan', 'pinjaman', 'instalment', 'ansuran', 'hire purchase',
+      'mortgage', 'financing', 'leasing', 'credit facility', 'term loan',
+      'trade financing', 'invoice financing',
+    ],
+    priority: 2,
+  },
+  'Money Transfer': {
+    keywords: [
+      'fund transfer', 'ibk fund', 'duitnow', 'fpx payment',
+      'transfer from', 'transfer fr a/c', 'instant transfer', 'ibg',
+      'wise', 'remittance', 'telegraphic transfer', 'tt',
+    ],
+    priority: 1,
+  },
+  'Refund': {
+    keywords: ['refund'],
+    priority: 0,
+  },
+};
+
 const CATEGORY_COLORS = {
   'Food & Dining': '#FF6B6B',
   'Grab/E-hailing': '#4ECDC4',
@@ -343,11 +481,33 @@ const CATEGORY_COLORS = {
   'Payment': '#BDC3C7',
 };
 
-function classifyTransaction(description) {
+const COMPANY_CATEGORY_COLORS = {
+  'Payments': '#4CAF50',
+  'Expenses': '#78909C',
+  'Payroll & Staff': '#5C6BC0',
+  'Rent & Property': '#8D6E63',
+  'Equipment & Assets': '#607D8B',
+  'Professional Services': '#7E57C2',
+  'Tax & Government': '#455A64',
+  'Owner\'s Draw': '#FFB300',
+  'Bank Fees': '#F44336',
+  'Utilities': '#26A69A',
+  'Petrol/EV': '#F39C12',
+  'Insurance': '#673AB7',
+  'Loan Repayment': '#D32F2F',
+  'Money Transfer': '#78909C',
+  'Refund': '#26A69A',
+  'Payment': '#BDC3C7',
+};
+
+function classifyTransaction(description, accountType = 'personal') {
   const lowerDesc = description.toLowerCase();
   const matches = [];
   
-  for (const [category, config] of Object.entries(CATEGORY_KEYWORDS)) {
+  // Use appropriate category keywords based on account type
+  const categoryKeywords = accountType === 'company' ? COMPANY_CATEGORY_KEYWORDS : CATEGORY_KEYWORDS;
+  
+  for (const [category, config] of Object.entries(categoryKeywords)) {
     for (const keyword of config.keywords) {
       const lowerKeyword = keyword.toLowerCase();
       
@@ -784,6 +944,7 @@ function generateDemoTransactions() {
 
 export default function Spendsie() {
   const [transactions, setTransactions] = useState([]);
+  const [accountType, setAccountType] = useState(null); // 'personal' or 'company'
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -810,6 +971,17 @@ export default function Spendsie() {
     background: 'from-slate-900 via-slate-800 to-amber-900/50',
   });
 
+  // Update category and color settings when account type changes
+  useEffect(() => {
+    if (accountType === 'company') {
+      setCategorySettings(COMPANY_CATEGORY_KEYWORDS);
+      setColorSettings(COMPANY_CATEGORY_COLORS);
+    } else {
+      setCategorySettings(CATEGORY_KEYWORDS);
+      setColorSettings(CATEGORY_COLORS);
+    }
+  }, [accountType]);
+
   // Spacing settings (in pixels)
   const [spacingSettings, setSpacingSettings] = useState({
     pagePadding: 24,        // px-6 = 24px
@@ -827,11 +999,11 @@ export default function Spendsie() {
     setSpacingSettings(prev => ({ ...prev, [key]: parseInt(value) || 0 }));
   };
 
-  const processTransactions = useCallback((rawTransactions) => {
+  const processTransactions = useCallback((rawTransactions, accType) => {
     return rawTransactions.map((t, idx) => ({
       id: idx + 1,
       ...t,
-      category: classifyTransaction(t.description),
+      category: classifyTransaction(t.description, accType),
     }));
   }, []);
 
@@ -1023,7 +1195,7 @@ export default function Spendsie() {
     
     if (allTransactions.length > 0) {
       addLog(`Success! Processing ${allTransactions.length} transactions...`);
-      const processed = processTransactions(allTransactions);
+      const processed = processTransactions(allTransactions, accountType);
       setTransactions(prev => {
         const combined = [...prev, ...processed];
         return combined.map((t, i) => ({ ...t, id: i + 1 }));
@@ -1046,7 +1218,9 @@ export default function Spendsie() {
   }, []);
 
   const loadDemo = () => {
-    const processed = processTransactions(generateDemoTransactions());
+    // Set personal type for demo data since it's personal spending
+    if (!accountType) setAccountType('personal');
+    const processed = processTransactions(generateDemoTransactions(), accountType || 'personal');
     setTransactions(processed);
     setUploadedFiles([{ name: 'maybank_dec_2025.pdf', size: 45678, type: 'application/pdf' }]);
     setParseError(null);
@@ -1063,10 +1237,11 @@ export default function Spendsie() {
     setRawText('');
     setOcrLog([]);
     setStatementMonths([]);
+    setAccountType(null);
   };
 
-  // Toggle category between Money Transfer and Income, or Refund and Money Transfer
-  // Also flips isCredit so it affects Total Income/Spending calculations
+  // Toggle category between Money Transfer and Income (personal) or Payments (company)
+  // Also handles Refund toggle. Flips isCredit so it affects Total Income/Spending calculations
   const toggleTransferIncome = (transactionId) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
@@ -1080,10 +1255,18 @@ export default function Spendsie() {
           if (hasRefundInDesc) {
             return { ...t, category: 'Refund', isCredit: true };
           }
-          // Otherwise, Money Transfer -> Income
-          return { ...t, category: 'Income', isCredit: true };
+          // For company accounts: Money Transfer -> Payments
+          // For personal accounts: Money Transfer -> Income
+          if (accountType === 'company') {
+            return { ...t, category: 'Payments', isCredit: true };
+          } else {
+            return { ...t, category: 'Income', isCredit: true };
+          }
         } else if (t.category === 'Income') {
-          // Income -> Money Transfer
+          // Income -> Money Transfer (personal accounts)
+          return { ...t, category: 'Money Transfer', isCredit: false };
+        } else if (t.category === 'Payments') {
+          // Payments -> Money Transfer (company accounts)
           return { ...t, category: 'Money Transfer', isCredit: false };
         }
       }
@@ -1328,8 +1511,12 @@ export default function Spendsie() {
             </button>
             
             <div className="glass rounded-xl" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', flexShrink: 0 }}>
-              <Building2 className="w-4 h-4 text-amber-400" />
-              <span className="text-sm">🇲🇾 Maybank</span>
+              {accountType === 'personal' ? (
+                <User className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Building2 className="w-4 h-4 text-amber-400" />
+              )}
+              <span className="text-sm">🇲🇾 Maybank {accountType === 'company' ? '(Company)' : '(Personal)'}</span>
             </div>
 
             {transactions.length > 0 && (
@@ -1404,46 +1591,94 @@ export default function Spendsie() {
                 </p>
               </div>
 
-            <div
-              className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px' }}
-              onDrop={handleDrop}
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={() => setDragActive(false)}
-              onClick={() => !isProcessing && document.getElementById('file-input').click()}
-            >
-              <input
-                id="file-input"
-                type="file"
-                multiple
-                accept=".pdf,.csv,.txt"
-                className="hidden"
-                onChange={(e) => handleFileUpload(Array.from(e.target.files))}
-                disabled={isProcessing}
-              />
-              
-              {isProcessing ? (
-                <div className="flex flex-col items-center justify-center">
-                  <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center relative overflow-hidden">
-                    <FileText className="w-10 h-10 text-amber-400 animate-pulse" />
-                  </div>
-                  <p className="text-xl font-medium text-amber-400 mb-2">Processing document...</p>
-                  <p className="text-sm text-slate-400">{processingStatus}</p>
+            {/* Account Type Selection */}
+            {!accountType ? (
+              <div className="glass rounded-2xl p-8 md:p-12">
+                <p className="text-center text-lg font-medium mb-6">Select your account type</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setAccountType('personal')}
+                    className="glass rounded-xl p-6 hover:border-amber-500/50 transition-all hover-lift text-left"
+                  >
+                    <div className="w-12 h-12 mb-4 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                      <User className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <p className="font-semibold mb-1">Personal</p>
+                    <p className="text-sm text-slate-400">Individual savings or current account</p>
+                  </button>
+                  <button
+                    onClick={() => setAccountType('company')}
+                    className="glass rounded-xl p-6 hover:border-amber-500/50 transition-all hover-lift text-left"
+                  >
+                    <div className="w-12 h-12 mb-4 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <p className="font-semibold mb-1">Company</p>
+                    <p className="text-sm text-slate-400">Business or SME account</p>
+                  </button>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center">
-                  <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center animate-float">
-                    <Upload className="w-10 h-10 text-amber-400" />
-                  </div>
-                  <p className="text-xl font-medium mb-2 text-center">Drop your Maybank statement here</p>
-                  <p className="text-slate-400 mb-6 text-center">or click to browse • PDF supported</p>
-                  <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-                    <FileText className="w-4 h-4" />
-                    <span>Reads PDF text with spatial reconstruction</span>
-                  </div>
+              </div>
+            ) : (
+              <>
+                {/* Selected Account Type Badge */}
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <span className="glass rounded-full px-4 py-2 text-sm flex items-center gap-2">
+                    {accountType === 'personal' ? (
+                      <><User className="w-4 h-4 text-amber-400" /> Personal Account</>
+                    ) : (
+                      <><Building2 className="w-4 h-4 text-amber-400" /> Company Account</>
+                    )}
+                  </span>
+                  <button
+                    onClick={() => setAccountType(null)}
+                    className="text-slate-400 hover:text-white text-sm underline"
+                  >
+                    Change
+                  </button>
                 </div>
-              )}
-            </div>
+
+                <div
+                  className={`upload-zone rounded-2xl p-8 md:p-12 cursor-pointer hover-lift ${dragActive ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px' }}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                  onDragLeave={() => setDragActive(false)}
+                  onClick={() => !isProcessing && document.getElementById('file-input').click()}
+                >
+                  <input
+                    id="file-input"
+                    type="file"
+                    multiple
+                    accept=".pdf,.csv,.txt"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(Array.from(e.target.files))}
+                    disabled={isProcessing}
+                  />
+                  
+                  {isProcessing ? (
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center relative overflow-hidden">
+                        <FileText className="w-10 h-10 text-amber-400 animate-pulse" />
+                      </div>
+                      <p className="text-xl font-medium text-amber-400 mb-2">Processing document...</p>
+                      <p className="text-sm text-slate-400">{processingStatus}</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-20 h-20 mb-6 rounded-2xl bg-amber-500/10 flex items-center justify-center animate-float">
+                        <Upload className="w-10 h-10 text-amber-400" />
+                      </div>
+                      <p className="text-xl font-medium mb-2 text-center">Drop your Maybank statement here</p>
+                      <p className="text-slate-400 mb-6 text-center">or click to browse • PDF supported</p>
+                      <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                        <FileText className="w-4 h-4" />
+                        <span>Reads PDF text with spatial reconstruction</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
 
             {parseError && (
               <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
@@ -1695,7 +1930,7 @@ export default function Spendsie() {
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
-                              {(t.category === 'Money Transfer' || t.category === 'Income' || t.category === 'Refund') ? (
+                              {(t.category === 'Money Transfer' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments') ? (
                                 <span 
                                   className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
@@ -1711,7 +1946,11 @@ export default function Spendsie() {
                                       ? 'Click to toggle: Refund → Money Transfer' 
                                       : t.category === 'Money Transfer' && t.description.toLowerCase().includes('refund')
                                         ? 'Click to toggle: Money Transfer → Refund'
-                                        : 'Click to toggle: Money Transfer ↔ Income'
+                                        : t.category === 'Payments'
+                                          ? 'Click to toggle: Payments ↔ Money Transfer'
+                                          : accountType === 'company'
+                                            ? 'Click to toggle: Money Transfer ↔ Payments'
+                                            : 'Click to toggle: Money Transfer ↔ Income'
                                   }
                                 >
                                   {t.category} ⇄
@@ -2018,8 +2257,8 @@ export default function Spendsie() {
               <div className="mt-6 pt-4 border-t border-white/10 flex justify-end gap-3">
                 <button
                   onClick={() => {
-                    setCategorySettings(CATEGORY_KEYWORDS);
-                    setColorSettings(CATEGORY_COLORS);
+                    setCategorySettings(accountType === 'company' ? COMPANY_CATEGORY_KEYWORDS : CATEGORY_KEYWORDS);
+                    setColorSettings(accountType === 'company' ? COMPANY_CATEGORY_COLORS : CATEGORY_COLORS);
                     setUiColors({
                       accent: '#F59E0B',
                       accentLight: '#FCD34D',
