@@ -1342,9 +1342,10 @@ export default function Spendsie() {
       filteredForStats = transactions.filter(t => t.statementMonth === monthFilter);
     }
     
-    // Include all transactions - user decides what's relevant for their purposes
+    // Expenses: all negative transactions (money going out)
+    // Income: only transactions categorized as "Income"
     const spending = filteredForStats.filter(t => !t.isCredit);
-    const income = filteredForStats.filter(t => t.isCredit);
+    const income = filteredForStats.filter(t => t.category === 'Income');
     
     const totalSpending = spending.reduce((sum, t) => sum + t.amount, 0);
     const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
