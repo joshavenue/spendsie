@@ -246,11 +246,17 @@ const CATEGORY_KEYWORDS = {
     keywords: ['kwsp', 'epf', 'kumpulan wang simpan', 'employees provident'],
     priority: 1,
   },
-  'Money Transfer': {
+  'Transfer Out': {
     keywords: [
-      'fund transfer', 'ibk fund', 'duitnow', 'mae qr', 'fpx payment',
-      'transfer from', 'transfer to', 'instant transfer', 'ibg',
-      'wise', 'remittance', 'western union', 'moneygram', 'worldremit',
+      'transfer from', 'transfer fr a/c', 'fund transfer from', 'ibk fund tfr fr',
+      'instant transfer', 'ibg', 'wise', 'remittance', 'western union', 'moneygram', 'worldremit',
+    ],
+    priority: 1,
+  },
+  'Transfer In': {
+    keywords: [
+      'transfer to a/c', 'transfer to', 'fund transfer to', 'ibk fund tfr to',
+      'duitnow', 'mae qr', 'fpx payment',
     ],
     priority: 1,
   },
@@ -434,11 +440,17 @@ const COMPANY_CATEGORY_KEYWORDS = {
     ],
     priority: 2,
   },
-  'Money Transfer': {
+  'Transfer Out': {
     keywords: [
-      'fund transfer', 'ibk fund', 'duitnow', 'fpx payment',
-      'transfer from', 'transfer fr a/c', 'transfer to a/c', 'transfer to',
+      'transfer from', 'transfer fr a/c', 'fund transfer from', 'ibk fund tfr fr',
       'instant transfer', 'ibg', 'wise', 'remittance', 'telegraphic transfer',
+    ],
+    priority: 1,
+  },
+  'Transfer In': {
+    keywords: [
+      'transfer to a/c', 'transfer to', 'fund transfer to', 'ibk fund tfr to',
+      'duitnow', 'fpx payment',
     ],
     priority: 1,
   },
@@ -468,7 +480,8 @@ const CATEGORY_COLORS = {
   'Government': '#455A64',
   'PTPTN': '#795548',
   'EPF/KWSP': '#8BC34A',
-  'Money Transfer': '#78909C',
+  'Transfer Out': '#FF7043',
+  'Transfer In': '#66BB6A',
   'Income': '#4CAF50',
   'Refund': '#26A69A',
   'ATM/Cash': '#FFC107',
@@ -494,7 +507,8 @@ const COMPANY_CATEGORY_COLORS = {
   'Petrol/EV': '#F39C12',
   'Insurance': '#673AB7',
   'Loan Repayment': '#D32F2F',
-  'Money Transfer': '#78909C',
+  'Transfer Out': '#FF7043',
+  'Transfer In': '#66BB6A',
   'Income': '#4CAF50',
   'Refund': '#26A69A',
   'Payment': '#BDC3C7',
@@ -1241,35 +1255,38 @@ export default function Spendsie() {
   };
 
   // Toggle category cycle:
-  // Company: Payments → Money Transfer → Income → Payments
-  // Personal: Money Transfer → Income → Money Transfer
-  // Refund: Refund → Money Transfer (if desc has "refund", can toggle back)
-  // Logic: Income always sets isCredit=true. Leaving Income flips it back to false.
+  // Company: Transfer Out → Transfer In → Income → Payments → Transfer Out
+  // Personal: Transfer Out → Transfer In → Income → Transfer Out
+  // Refund: Refund → Transfer Out (if desc has "refund", can toggle back)
   const toggleTransferIncome = (transactionId) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
         const hasRefundInDesc = t.description.toLowerCase().includes('refund');
         
         if (t.category === 'Refund') {
-          // Refund -> Money Transfer
-          return { ...t, category: 'Money Transfer' };
-        } else if (t.category === 'Money Transfer') {
+          // Refund -> Transfer Out
+          return { ...t, category: 'Transfer Out', isCredit: false };
+        } else if (t.category === 'Transfer Out') {
           // If original description had "refund", toggle back to Refund
           if (hasRefundInDesc) {
             return { ...t, category: 'Refund', isCredit: true };
           }
-          // Money Transfer -> Income (income is always positive)
+          // Transfer Out -> Transfer In
+          return { ...t, category: 'Transfer In', isCredit: true };
+        } else if (t.category === 'Transfer In') {
+          // Transfer In -> Income
           return { ...t, category: 'Income', isCredit: true };
         } else if (t.category === 'Income') {
-          // Leaving Income - flip isCredit to false (not income = expense/outgoing)
+          // For company: Income -> Payments
+          // For personal: Income -> Transfer Out
           if (accountType === 'company') {
             return { ...t, category: 'Payments', isCredit: false };
           } else {
-            return { ...t, category: 'Money Transfer', isCredit: false };
+            return { ...t, category: 'Transfer Out', isCredit: false };
           }
         } else if (t.category === 'Payments') {
-          // Payments -> Money Transfer (preserve isCredit)
-          return { ...t, category: 'Money Transfer' };
+          // Payments -> Transfer Out (company accounts)
+          return { ...t, category: 'Transfer Out', isCredit: false };
         }
       }
       return t;
@@ -1933,7 +1950,7 @@ export default function Spendsie() {
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
-                              {(t.category === 'Money Transfer' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments') ? (
+                              {(t.category === 'Transfer Out' || t.category === 'Transfer In' || t.category === 'Income' || t.category === 'Refund' || t.category === 'Payments') ? (
                                 <span 
                                   className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
@@ -1946,12 +1963,12 @@ export default function Spendsie() {
                                   onClick={() => toggleTransferIncome(t.id)}
                                   title={
                                     t.category === 'Refund' 
-                                      ? 'Click to toggle: Refund → Money Transfer' 
-                                      : t.category === 'Money Transfer' && t.description.toLowerCase().includes('refund')
-                                        ? 'Click to toggle: Money Transfer → Refund'
+                                      ? 'Click to cycle: Refund → Transfer Out' 
+                                      : t.category === 'Transfer Out' && t.description.toLowerCase().includes('refund')
+                                        ? 'Click to cycle: Transfer Out → Refund'
                                         : accountType === 'company'
-                                          ? 'Click to cycle: Payments → Money Transfer → Income'
-                                          : 'Click to toggle: Money Transfer ↔ Income'
+                                          ? 'Click to cycle: Transfer Out → Transfer In → Income → Payments'
+                                          : 'Click to cycle: Transfer Out → Transfer In → Income'
                                   }
                                 >
                                   {t.category} ⇄
