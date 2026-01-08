@@ -1244,6 +1244,7 @@ export default function Spendsie() {
   // Company: Payments → Money Transfer → Income → Payments
   // Personal: Money Transfer → Income → Money Transfer
   // Refund: Refund → Money Transfer (if desc has "refund", can toggle back)
+  // Logic: Income always sets isCredit=true. Leaving Income flips it back to false.
   const toggleTransferIncome = (transactionId) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
@@ -1251,25 +1252,24 @@ export default function Spendsie() {
         
         if (t.category === 'Refund') {
           // Refund -> Money Transfer
-          return { ...t, category: 'Money Transfer', isCredit: false };
+          return { ...t, category: 'Money Transfer' };
         } else if (t.category === 'Money Transfer') {
           // If original description had "refund", toggle back to Refund
           if (hasRefundInDesc) {
             return { ...t, category: 'Refund', isCredit: true };
           }
-          // Money Transfer -> Income (both account types)
+          // Money Transfer -> Income (income is always positive)
           return { ...t, category: 'Income', isCredit: true };
         } else if (t.category === 'Income') {
-          // For company: Income -> Payments
-          // For personal: Income -> Money Transfer
+          // Leaving Income - flip isCredit to false (not income = expense/outgoing)
           if (accountType === 'company') {
-            return { ...t, category: 'Payments', isCredit: true };
+            return { ...t, category: 'Payments', isCredit: false };
           } else {
             return { ...t, category: 'Money Transfer', isCredit: false };
           }
         } else if (t.category === 'Payments') {
-          // Payments -> Money Transfer (company accounts)
-          return { ...t, category: 'Money Transfer', isCredit: false };
+          // Payments -> Money Transfer (preserve isCredit)
+          return { ...t, category: 'Money Transfer' };
         }
       }
       return t;
