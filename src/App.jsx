@@ -257,10 +257,14 @@ const CATEGORY_KEYWORDS = {
   'Income': {
     keywords: [
       'salary', 'gaji', 'cr pymt', 'cash deposit', 'interest paid', 'interest earned',
-      'refund', 'cashback', 'rebate', 'dividend', 'bonus', 'commission', 'allowance',
+      'cashback', 'rebate', 'dividend', 'bonus', 'commission', 'allowance',
       'reimbursement', 'claim', 'payment received', 'credit',
     ],
     priority: 2,
+  },
+  'Refund': {
+    keywords: ['refund'],
+    priority: 0,  // Highest priority - if description contains "refund", always use this category
   },
   'ATM/Cash': {
     keywords: ['atm', 'cash withdrawal', 'withdraw', 'pengeluaran', 'cash out', 'cwd'],
@@ -329,6 +333,7 @@ const CATEGORY_COLORS = {
   'EPF/KWSP': '#8BC34A',
   'Money Transfer': '#78909C',
   'Income': '#4CAF50',
+  'Refund': '#26A69A',
   'ATM/Cash': '#FFC107',
   'Fees & Charges': '#F44336',
   'Investment': '#1E88E5',
@@ -1004,16 +1009,25 @@ export default function Spendsie() {
     setStatementMonths([]);
   };
 
-  // Toggle category between Money Transfer and Income
+  // Toggle category between Money Transfer and Income, or Refund and Money Transfer
   // Also flips isCredit so it affects Total Income/Spending calculations
   const toggleTransferIncome = (transactionId) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === transactionId) {
-        if (t.category === 'Money Transfer') {
-          // Money Transfer -> Income: mark as credit (income)
+        const hasRefundInDesc = t.description.toLowerCase().includes('refund');
+        
+        if (t.category === 'Refund') {
+          // Refund -> Money Transfer: user is refunding someone (outgoing)
+          return { ...t, category: 'Money Transfer', isCredit: false };
+        } else if (t.category === 'Money Transfer') {
+          // If original description had "refund", toggle back to Refund
+          if (hasRefundInDesc) {
+            return { ...t, category: 'Refund', isCredit: true };
+          }
+          // Otherwise, Money Transfer -> Income
           return { ...t, category: 'Income', isCredit: true };
         } else if (t.category === 'Income') {
-          // Income -> Money Transfer: mark as debit (not income)
+          // Income -> Money Transfer
           return { ...t, category: 'Money Transfer', isCredit: false };
         }
       }
@@ -1575,7 +1589,7 @@ export default function Spendsie() {
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px` }}>
-                              {(t.category === 'Money Transfer' || t.category === 'Income') ? (
+                              {(t.category === 'Money Transfer' || t.category === 'Income' || t.category === 'Refund') ? (
                                 <span 
                                   className="rounded-full text-xs font-medium cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
                                   style={{ 
@@ -1586,7 +1600,13 @@ export default function Spendsie() {
                                     color: colorSettings[t.category] || colorSettings['Payment']
                                   }}
                                   onClick={() => toggleTransferIncome(t.id)}
-                                  title="Click to toggle between Money Transfer ↔ Income"
+                                  title={
+                                    t.category === 'Refund' 
+                                      ? 'Click to toggle: Refund → Money Transfer' 
+                                      : t.category === 'Money Transfer' && t.description.toLowerCase().includes('refund')
+                                        ? 'Click to toggle: Money Transfer → Refund'
+                                        : 'Click to toggle: Money Transfer ↔ Income'
+                                  }
                                 >
                                   {t.category} ⇄
                                 </span>
