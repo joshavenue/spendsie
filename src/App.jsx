@@ -91,6 +91,8 @@ export default function Spendsie() {
   const [categorySettings, setCategorySettings] = useState(CATEGORY_KEYWORDS);
   const [colorSettings, setColorSettings] = useState(CATEGORY_COLORS);
   const [openDropdownId, setOpenDropdownId] = useState(null); // Track which dropdown is open
+  const [selectedTransactions, setSelectedTransactions] = useState(new Set()); // Track selected transaction IDs
+  const [showBulkDropdown, setShowBulkDropdown] = useState(false); // Bulk action dropdown
   const [uiColors, setUiColors] = useState({
     accent: '#F59E0B', // amber
     accentLight: '#FCD34D',
@@ -380,6 +382,58 @@ export default function Spendsie() {
   const availableCategories = useMemo(() => {
     return Object.keys(colorSettings).sort();
   }, [colorSettings]);
+
+  // Toggle selection of a single transaction
+  const toggleTransactionSelection = (transactionId) => {
+    setSelectedTransactions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(transactionId)) {
+        newSet.delete(transactionId);
+      } else {
+        newSet.add(transactionId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle select all visible transactions
+  const toggleSelectAll = (visibleTransactionIds) => {
+    setSelectedTransactions(prev => {
+      const allSelected = visibleTransactionIds.every(id => prev.has(id));
+      if (allSelected) {
+        // Deselect all visible
+        const newSet = new Set(prev);
+        visibleTransactionIds.forEach(id => newSet.delete(id));
+        return newSet;
+      } else {
+        // Select all visible
+        const newSet = new Set(prev);
+        visibleTransactionIds.forEach(id => newSet.add(id));
+        return newSet;
+      }
+    });
+  };
+
+  // Bulk change category for selected transactions
+  const bulkChangeCategory = (newCategory) => {
+    const creditCategories = ['Income', 'Transfer In', 'Refund', 'Payments'];
+    const isCredit = creditCategories.includes(newCategory);
+    
+    setTransactions(prev => prev.map(t => {
+      if (selectedTransactions.has(t.id)) {
+        return { ...t, category: newCategory, isCredit };
+      }
+      return t;
+    }));
+    
+    setSelectedTransactions(new Set()); // Clear selection after bulk action
+    setShowBulkDropdown(false);
+  };
+
+  // Clear all selections
+  const clearSelections = () => {
+    setSelectedTransactions(new Set());
+  };
 
   const handleSort = (key) => {
     setSortConfig(prev => ({
@@ -962,11 +1016,70 @@ export default function Spendsie() {
                   <span className="text-sm text-slate-400">{filteredAndSortedTransactions.length} of {transactions.length}</span>
                 </div>
                 
+                {/* Bulk Action Bar - Shows when transactions are selected */}
+                {selectedTransactions.size > 0 && (
+                  <div className="flex items-center gap-4 p-3 mb-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                    <span className="text-amber-400 font-medium">
+                      {selectedTransactions.size} selected
+                    </span>
+                    
+                    <div className="relative">
+                      <button
+                        className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+                        onClick={() => setShowBulkDropdown(!showBulkDropdown)}
+                      >
+                        Change Category
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      
+                      {showBulkDropdown && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-40" 
+                            onClick={() => setShowBulkDropdown(false)}
+                          />
+                          <div className="category-dropdown absolute left-0 top-full mt-1 z-50 bg-slate-800 border border-white/10 rounded-lg shadow-xl py-1 min-w-[200px] max-h-[300px] overflow-y-auto">
+                            {availableCategories.map((cat) => (
+                              <button
+                                key={cat}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-white/10 transition-colors flex items-center gap-2"
+                                onClick={() => bulkChangeCategory(cat)}
+                              >
+                                <span 
+                                  className="w-3 h-3 rounded-full flex-shrink-0"
+                                  style={{ background: colorSettings[cat] }}
+                                />
+                                <span style={{ color: colorSettings[cat] }}>{cat}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    
+                    <button
+                      className="px-3 py-1.5 text-slate-400 hover:text-white text-sm transition-colors"
+                      onClick={clearSelections}
+                    >
+                      Clear selection
+                    </button>
+                  </div>
+                )}
+                
                 <div className="overflow-hidden rounded-xl border border-white/5">
                   <div className="overflow-x-auto max-h-[500px] overflow-y-auto scrollbar-thin">
                     <table className="w-full text-sm">
                       <thead className="bg-slate-800/50 sticky top-0">
                         <tr>
+                          <th className="text-center font-medium text-slate-400" style={{ padding: `${spacingSettings.tableRowPadding}px`, width: '40px' }}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-0 cursor-pointer"
+                              checked={filteredAndSortedTransactions.length > 0 && filteredAndSortedTransactions.every(t => selectedTransactions.has(t.id))}
+                              onChange={() => toggleSelectAll(filteredAndSortedTransactions.map(t => t.id))}
+                              title="Select all visible"
+                            />
+                          </th>
                           <th className="text-left font-medium text-slate-400 sortable" style={{ padding: `${spacingSettings.tableRowPadding}px` }} onClick={() => handleSort('isoDate')}>
                             <div className="flex items-center gap-1">Date <SortIcon columnKey="date" /></div>
                           </th>
@@ -983,7 +1096,15 @@ export default function Spendsie() {
                       </thead>
                       <tbody>
                         {filteredAndSortedTransactions.map((t) => (
-                          <tr key={t.id} className="table-row border-t border-white/5">
+                          <tr key={t.id} className={`table-row border-t border-white/5 ${selectedTransactions.has(t.id) ? 'bg-amber-500/5' : ''}`}>
+                            <td className="text-center" style={{ padding: `${spacingSettings.tableRowPadding}px`, width: '40px' }}>
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-0 cursor-pointer"
+                                checked={selectedTransactions.has(t.id)}
+                                onChange={() => toggleTransactionSelection(t.id)}
+                              />
+                            </td>
                             <td className="mono text-slate-400 text-xs whitespace-nowrap" style={{ padding: `${spacingSettings.tableRowPadding}px` }}>{t.date}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.description}>{t.description}</td>
                             <td style={{ padding: `${spacingSettings.tableRowPadding}px`, position: 'relative' }}>
@@ -1039,7 +1160,7 @@ export default function Spendsie() {
                         ))}
                         {filteredAndSortedTransactions.length === 0 && (
                           <tr>
-                            <td colSpan={4} className="p-8 text-center text-slate-500">No transactions match</td>
+                            <td colSpan={5} className="p-8 text-center text-slate-500">No transactions match</td>
                           </tr>
                         )}
                       </tbody>
