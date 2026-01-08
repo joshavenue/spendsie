@@ -1385,8 +1385,9 @@ export default function Spendsie() {
       filteredForStats = transactions.filter(t => t.statementMonth === monthFilter);
     }
     
+    // Include all transactions - user decides what's relevant for their purposes
     const spending = filteredForStats.filter(t => !t.isCredit);
-    const income = filteredForStats.filter(t => t.isCredit && t.category !== 'Refund');
+    const income = filteredForStats.filter(t => t.isCredit);
     
     const totalSpending = spending.reduce((sum, t) => sum + t.amount, 0);
     const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
@@ -1749,7 +1750,7 @@ export default function Spendsie() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: `${spacingSettings.statsGap}px`, marginBottom: `${spacingSettings.statsMarginBottom}px` }}>
               <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
-                <p className="text-slate-400 text-sm mb-3">Total Spending</p>
+                <p className="text-slate-400 text-sm mb-3">Total Expenses</p>
                 <p className="text-2xl md:text-3xl font-bold mono text-red-400">
                   RM{stats.totalSpending.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
@@ -1761,7 +1762,7 @@ export default function Spendsie() {
                 </p>
               </div>
               <div className="glass rounded-2xl hover-lift" style={{ padding: `${spacingSettings.statsCardPadding}px` }}>
-                <p className="text-slate-400 text-sm mb-3">Net Flow</p>
+                <p className="text-slate-400 text-sm mb-3">Net Profit/Loss</p>
                 <p className={`text-2xl md:text-3xl font-bold mono ${stats.totalIncome - stats.totalSpending >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   RM{(stats.totalIncome - stats.totalSpending).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
