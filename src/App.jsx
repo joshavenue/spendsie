@@ -556,9 +556,13 @@ function parseMaybankOCR(text) {
       continue;
     }
     
-    // Check if line starts with a date (DD/MM/YY)
-    // Be flexible: DD/MM/YY or D/MM/YY or DD/M/YY, with / or - or .
-    const dateMatch = line.match(/^(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2})\b\s*(.*)/);
+    // Check if line starts with a date
+    // Supports: DD/MM/YY (30/11/25) or DD/MM (01/04) - year inferred from statement
+    // Be flexible with separators: / or - or .
+    const dateMatchFull = line.match(/^(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})\b\s*(.*)/);
+    const dateMatchShort = line.match(/^(\d{1,2}[\/\-\.]\d{1,2})\s+([A-Z].*)/i);
+    
+    const dateMatch = dateMatchFull || dateMatchShort;
     
     if (dateMatch) {
       // Save previous transaction if exists
@@ -570,9 +574,18 @@ function parseMaybankOCR(text) {
         }
       }
       
-      // Normalize date format to DD/MM/YY
-      const date = dateMatch[1].replace(/[\-\.]/g, '/');
+      // Normalize date format
+      let date = dateMatch[1].replace(/[\-\.]/g, '/');
       const restOfLine = dateMatch[2] || '';
+      
+      // If date is DD/MM format (no year), append year from statement date
+      if (date.split('/').length === 2 && statementMonth) {
+        const yearMatch = statementMonth.match(/\d{4}/);
+        if (yearMatch) {
+          const year = yearMatch[0].slice(-2); // Get last 2 digits
+          date = date + '/' + year;
+        }
+      }
       
       console.log('Found date line:', date, '|', restOfLine); // Debug
       
@@ -610,12 +623,12 @@ function parseMaybankOCR(text) {
           } else {
             // No explicit sign - infer from transaction type in description
             const upperRest = restOfLine.toUpperCase();
-            // Credit indicators
-            if (/CASH DEPOSIT|CR PYMT|FUND TRANSFER TO|IBK FUND TFR TO|REFUND|INTEREST PAID|SALARY|GAJI/.test(upperRest)) {
+            // Credit indicators (money coming IN)
+            if (/CASH DEPOSIT|CR PYMT|FUND TRANSFER TO|IBK FUND TFR TO|TRANSFER TO A\/C|REFUND|INTEREST PAID|SALARY|GAJI/.test(upperRest)) {
               isCredit = true;
             } 
-            // Debit indicators
-            else if (/SALE DEBIT|PRE-AUTH|PAYMENT|TRANSFER FROM|DIRECT DEBIT|CMS-DIRECT/.test(upperRest)) {
+            // Debit indicators (money going OUT)
+            else if (/SALE DEBIT|PRE-AUTH|PAYMENT|TRANSFER FROM|TRANSFER FR A\/C|DIRECT DEBIT|CMS-DIRECT/.test(upperRest)) {
               isCredit = false;
             }
             // Default to debit (spending) if unclear
@@ -694,7 +707,7 @@ function parseMaybankOCR(text) {
         } else {
           // Infer from description we've collected so far
           const descUpper = descriptionLines.join(' ').toUpperCase();
-          if (/CASH DEPOSIT|CR PYMT|FUND TRANSFER TO|IBK FUND TFR TO|REFUND|INTEREST PAID|SALARY|GAJI/.test(descUpper)) {
+          if (/CASH DEPOSIT|CR PYMT|FUND TRANSFER TO|IBK FUND TFR TO|TRANSFER TO A\/C|REFUND|INTEREST PAID|SALARY|GAJI/.test(descUpper)) {
             currentTransaction.isCredit = true;
           } else {
             currentTransaction.isCredit = false;
